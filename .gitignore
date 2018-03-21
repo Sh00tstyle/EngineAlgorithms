@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+_vs2015/.vs/
+_vs2015/debug_static_build/vc141.idb
+_vs2015/debug_static_build/
