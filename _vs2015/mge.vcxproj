@@ -189,6 +189,9 @@
     <ClInclude Include="..\src\mge\materials\TextureMaterial.hpp" />
     <ClInclude Include="..\src\mge\materials\WobblingMaterial.h" />
     <ClInclude Include="..\src\mge\MGEDemo.hpp" />
+    <ClInclude Include="..\src\mge\octree\Octree.h" />
+    <ClInclude Include="..\src\mge\octree\OctreeNode.h" />
+    <ClInclude Include="..\src\mge\octree\OctreeWorld.h" />
     <ClInclude Include="..\src\mge\util\DebugHud.hpp" />
     <ClInclude Include="..\src\ShaderUtil.h" />
   </ItemGroup>
@@ -215,6 +218,9 @@
     <ClCompile Include="..\src\mge\materials\TextureMaterial.cpp" />
     <ClCompile Include="..\src\mge\materials\WobblingMaterial.cpp" />
     <ClCompile Include="..\src\mge\MGEDemo.cpp" />
+    <ClCompile Include="..\src\mge\octree\Octree.cpp" />
+    <ClCompile Include="..\src\mge\octree\OctreeNode.cpp" />
+    <ClCompile Include="..\src\mge\octree\OctreeWorld.cpp" />
     <ClCompile Include="..\src\mge\util\DebugHud.cpp" />
     <ClCompile Include="..\src\ShaderUtil.cpp" />
   </ItemGroup>

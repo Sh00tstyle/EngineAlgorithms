@@ -4,6 +4,7 @@
 #include "mge/core/AbstractGame.hpp"
 
 class DebugHud;
+class OctreeWorld;
 
 /**
  * An example subclass of AbstractGame showing how we can setup a scene.

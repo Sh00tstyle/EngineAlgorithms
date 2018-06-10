@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <string>
 
-class World;
+class OctreeWorld;
 class Renderer;
 
 /**
@@ -52,7 +52,7 @@ class AbstractGame
 
 		sf::RenderWindow* _window;  //sfml window to render into
 		Renderer* _renderer;        //the renderer class to render the world
-		World* _world;              //the root game object that represents our scene
+		OctreeWorld* _world;              //the root game object that represents our scene
 		float _fps;                 //stores the real fps
 
     private:

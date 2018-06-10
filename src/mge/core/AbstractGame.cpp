@@ -2,7 +2,7 @@
 
 #include "AbstractGame.hpp"
 #include "mge/core/Renderer.hpp"
-#include "mge/core/World.hpp"
+#include "mge/octree/OctreeWorld.h"
 
 AbstractGame::AbstractGame():_window(NULL),_renderer(NULL),_world(NULL), _fps(0)
 {
@@ -77,7 +77,7 @@ void AbstractGame::_initializeRenderer() {
 void AbstractGame::_initializeWorld() {
     //setup the world
 	std::cout << "Initializing world..." << std::endl;
-	_world = new World();
+	_world = new OctreeWorld();
     std::cout << "World initialized." << std::endl << std::endl;
 }
 

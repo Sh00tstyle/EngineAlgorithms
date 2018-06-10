@@ -24,11 +24,17 @@
 
 #include "mge/util/DebugHud.hpp"
 
+#include "mge/octree/OctreeWorld.h"
+#include "mge/octree/Octree.h"
+
 #include "mge/config.hpp"
 #include "mge/MGEDemo.hpp"
 
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEDemo::MGEDemo() :AbstractGame(), _hud(0) {
+}
+
+MGEDemo::~MGEDemo() {
 }
 
 void MGEDemo::initialize() {
@@ -166,8 +172,4 @@ void MGEDemo::_processEvents() {
 	if(exit) {
 		_window->close();
 	}
-}
-
-MGEDemo::~MGEDemo() {
-	//dtor
 }

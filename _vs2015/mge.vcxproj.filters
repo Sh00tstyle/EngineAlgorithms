@@ -29,6 +29,9 @@
     <Filter Include="Assets\mge\shaders">
       <UniqueIdentifier>{9fd3c986-734d-4d83-9b35-3e914a4e8127}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MGE Source files\mge\octree">
+      <UniqueIdentifier>{29adf360-3073-49ca-9b0d-9459728cf632}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\glm.hpp">
@@ -106,6 +109,15 @@
     <ClInclude Include="..\src\mge\materials\TerrainMaterial.h">
       <Filter>MGE Source files\mge\materials</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mge\octree\Octree.h">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mge\octree\OctreeWorld.h">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mge\octree\OctreeNode.h">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -179,6 +191,15 @@
     </ClCompile>
     <ClCompile Include="..\src\mge\materials\TerrainMaterial.cpp">
       <Filter>MGE Source files\mge\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\octree\Octree.cpp">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\octree\OctreeWorld.cpp">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\octree\OctreeNode.cpp">
+      <Filter>MGE Source files\mge\octree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

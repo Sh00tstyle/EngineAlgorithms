@@ -58,7 +58,7 @@ class GameObject
         //Adding a gameobject or resetting the parent, recursively passes on the world pointer to all child objects
 
         //shortcut to set the parent of pChild to ourselves
-		void add (GameObject* pChild);
+		virtual void add (GameObject* pChild);
 		//shortcut to set the parent of pChild to nullptr
 		void remove (GameObject* pChild);
 
