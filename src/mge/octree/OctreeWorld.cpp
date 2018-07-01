@@ -1,3 +1,5 @@
+#include <iostream>
+#include <string>
 #include "OctreeWorld.h"
 #include "Octree.h"
 #include "mge/octree/BoundingBox.h"

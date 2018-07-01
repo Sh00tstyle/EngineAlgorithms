@@ -67,7 +67,7 @@ void MGEDemo::_initializeScene() {
 	glm::vec3 pos;
 
 	for(int i = 0; i < cubeAmt; i++) {
-		pos = glm::vec3(i * 2, 3, 3);
+		pos = glm::vec3((i - 3) * 3, 3, 3);
 
 		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
 		newCube->setMesh(cubeMeshF);

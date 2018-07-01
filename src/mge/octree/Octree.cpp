@@ -23,12 +23,7 @@ void Octree::addObject(GameObject * newObject) {
 
 //returns true, if the node could store the object otherwise returns false
 bool Octree::updateNodes(GameObject* gameObject) {
-	addObject(gameObject); //add to root node only for now
-	return true;
-
-	//DOES NOT WORK, REDO
-	/**
-	if(_bounds->fullyContains(gameObject->getBoundingBox())) { //use either fullyContains() or partlyContains()
+	if(_bounds->contains(gameObject->getBoundingBox())) {
 		if(_depth < TOTAL_DEPTH) {
 			//gameobject is in the current octant, but check for children
 			for(int i = 0; i < 8; i++) {
@@ -40,19 +35,19 @@ bool Octree::updateNodes(GameObject* gameObject) {
 		}
 
 		//child nodes can't hold the object or there are no child nodes left, so store it in this node and return true
-		addObject(gameObject);
+		_objects.push_back(gameObject);
 		return true;
 	}
-	/**/
 
 	//this octant doesnt store the object, so return false
 	return false;
 }
 
 void Octree::clearObjects() {
+	_objects.clear();
+
 	if(_depth >= TOTAL_DEPTH) return;
 
-	_objects.clear();
 	for(int i = 0; i < 8; i++) {
 		_childNodes[i]->clearObjects();
 	}
@@ -63,7 +58,7 @@ void Octree::checkCollisions() {
 	if(_objects.size() > 1) {
 		for(unsigned i = 0; i < _objects.size(); i++) {
 			//avoid checking collisons twice for
-			for(unsigned j = i + 1; j < _objects.size(); j++) {
+			for(unsigned j = i; j < _objects.size(); j++) {
 				if(j == i) continue; //avoid checking against itself
 
 				//collision detection calculation
