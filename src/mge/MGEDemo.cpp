@@ -52,61 +52,32 @@ void MGEDemo::initialize() {
 //build the game _world
 void MGEDemo::_initializeScene() {
 	//Meshes
-	Mesh* planeMesh = Mesh::load(config::MGE_MODEL_PATH + "plane_8192.obj");
 	Mesh* cubeMeshF = Mesh::load(config::MGE_MODEL_PATH + "cube_flat.obj");
 
 	//Materials
 	AbstractMaterial* whiteColorMat = new ColorMaterial(glm::vec3(1, 1, 1));
-	AbstractMaterial* litMat = new LitMaterial(glm::vec3(0, 1, 1), glm::vec3(1, 0, 1), glm::vec3(1, 1, 1), 256.0f);
-	AbstractMaterial* terrainMat = new TerrainMaterial(
-		glm::vec3(0.1f, 0.1f, 0.1f), //ambient color
-		glm::vec3(1, 1, 1), //specular color
-		256.0f, //shininess
-		Texture::load(config::MGE_TEXTURE_PATH + "diffuse1.jpg"), //diffuse texture 1
-		Texture::load(config::MGE_TEXTURE_PATH + "water.jpg"), //diffuse texture 2
-		Texture::load(config::MGE_TEXTURE_PATH + "diffuse3.jpg"), //diffuse texture 3
-		Texture::load(config::MGE_TEXTURE_PATH + "diffuse4.jpg"), //diffuse texture 4
-		Texture::load(config::MGE_TEXTURE_PATH + "heightmap.png"), //heightmap texture
-		Texture::load(config::MGE_TEXTURE_PATH + "splatmap.png") //splatmap texture
-	);
 
 	//Gameobjects
-	Camera* camera = new Camera("camera", glm::vec3(0, 5, 10));
-	camera->rotate(glm::radians(-20.0f), glm::vec3(1.0f, 0.0f, 0.0f)); //rotate by -20° around the x axis
+	Camera* camera = new Camera("camera", glm::vec3(0, 5, 25));
 	_world->add(camera);
 	_world->setMainCamera(camera);
 
-	GameObject* plane = new GameObject("plane", glm::vec3(0, 0, 0));
-	plane->scale(glm::vec3(5, 5, 5));
-	plane->setMesh(planeMesh);
-	plane->setMaterial(terrainMat);
-	plane->setBehaviour(new KeysBehaviour(10)); //to rotate the terrain
-	_world->add(plane);
+	//Testing
+	int cubeAmt = 5;
+	glm::vec3 pos;
 
-	Light* mainLight = new Light(LightType::DIRECTIONAL, //light type
-								 glm::vec3(1, 1, 0), //light color
-								 1.0f, //intensity
-								 0.5f, //ambientContribution 
-								 1.0f, //constantAttenutation
-								 0.3f, //linearAttenuation
-								 0.0f, //quadraticAttenuation
-								 45.0f, //outerConeAngle
-								 25.0f, //innerConeAngle
-								 "mainLight", //name
-								 glm::vec3(0, 6, 0) //position
-	);
-	mainLight->scale(glm::vec3(0.3f, 0.3f, 0.3f));
-	mainLight->setMesh(cubeMeshF);
-	mainLight->setBehaviour(new LightControlBehaviour(mainLight, 25));
-	_world->add(mainLight); //light gets automatically registered in the world
+	for(int i = 0; i < cubeAmt; i++) {
+		pos = glm::vec3(i * 2, 3, 3);
 
-	GameObject* indicator = new GameObject("indicator", glm::vec3(0, 0, 1.0f));
-	indicator->scale(glm::vec3(0.5f, 0.5f, 0.5f));
-	indicator->setMesh(cubeMeshF);
-	indicator->setMaterial(whiteColorMat);
-	mainLight->add(indicator); //adding as a child of light
+		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
+		newCube->setMesh(cubeMeshF);
+		newCube->setMaterial(whiteColorMat);
+		newCube->setBoundingBox(new BoundingBox(newCube, glm::vec3(1, 1, 1))); //add collider to make it work
 
-	_renderer->setClearColor(52, 204, 255, 255); //changing clear color (background) to light blue
+		if(i == 0) newCube->setBehaviour(new KeysBehaviour());
+
+		_world->add(newCube); //also adding to the octree
+	}
 }
 
 void MGEDemo::_render() {

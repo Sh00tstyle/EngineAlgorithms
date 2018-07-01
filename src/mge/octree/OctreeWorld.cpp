@@ -13,9 +13,27 @@ OctreeWorld::~OctreeWorld() {
 	delete _octree;
 }
 
-void OctreeWorld::add(GameObject* pChild) {
-	//add object to the octree if it has a box collider
-	if(pChild->getBoundingBox() != nullptr) _octree->addObject(pChild);
+void OctreeWorld::update(float step) {
+	GameObject::update(step); //base class update
 
+	_octree->checkCollisions();
+}
+
+void OctreeWorld::add(GameObject* pChild) {
 	World::add(pChild); //calling the base class function
+
+	updateOctree(); //update octree everytime an object is added (costly)
+}
+
+void OctreeWorld::updateOctree() {
+	_octree->clearObjects(); //empty the whole octree
+
+	//reassign all objects to the octree nodes
+	for(int i = 0; i < getChildCount(); i++) {
+		GameObject* child = getChildAt(i);
+
+		if(child->getBoundingBox() != nullptr) {
+			if(!_octree->updateNodes(getChildAt(i))) _octree->addObject(child); //add to the root, if it coudnt be added somewhere else
+		}
+	}
 }

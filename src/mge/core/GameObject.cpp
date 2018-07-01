@@ -206,11 +206,11 @@ BoundingBox * GameObject::getBoundingBox() {
 	return _bounds;
 }
 
-void GameObject::SetStatic(bool status) {
+void GameObject::setStatic(bool status) {
 	_isStatic = status;
 }
 
-bool GameObject::IsStatic() {
+bool GameObject::isStatic() {
 	return _isStatic;
 }
 

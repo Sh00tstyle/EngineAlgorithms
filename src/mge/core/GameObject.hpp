@@ -73,8 +73,8 @@ class GameObject
 		void setBoundingBox(BoundingBox* bounds);
 		BoundingBox* getBoundingBox();
 
-		void SetStatic(bool status);
-		bool IsStatic();
+		void setStatic(bool status);
+		bool isStatic();
 
 	protected:
 		std::string _name;

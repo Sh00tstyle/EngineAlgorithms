@@ -1,10 +1,11 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
-#include <vector>;
+#include <vector>
 
 class BoundingBox;
 class GameObject;
+class OctreeWorld;
 
 class Octree {
 	public:
@@ -12,8 +13,10 @@ class Octree {
 		~Octree();
 
 		void addObject(GameObject* newObject);
-		void updateTree();
-		
+		bool updateNodes(GameObject* gameObject);
+		void clearObjects();
+
+		void checkCollisions();
 
 	private:
 		static int TOTAL_DEPTH;
@@ -25,7 +28,9 @@ class Octree {
 		int _depth;
 
 		void initOctree(int depth);
-		void destructTree();
+		void destructOctree();
+
+		bool isColliding(BoundingBox* one, BoundingBox* other);
 
 };
 

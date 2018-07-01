@@ -11,7 +11,10 @@ class OctreeWorld : public World {
 		OctreeWorld();
 		~OctreeWorld();
 
+		virtual void update(float step);
+
 		virtual void add(GameObject* pChild);
+		void updateOctree();
 
 	private:
 		Octree* _octree;
