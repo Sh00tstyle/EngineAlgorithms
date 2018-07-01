@@ -9,6 +9,7 @@ class AbstractBehaviour;
 class AbstractMaterial;
 class World;
 class Mesh;
+class BoundingBox;
 
 /**
  * A GameObject wraps all data required to display an object, but knows nothing about OpenGL or rendering.
@@ -68,6 +69,13 @@ class GameObject
         int getChildCount() const;
         GameObject* getChildAt (int pIndex) const;
 
+		//collision detection
+		void setBoundingBox(BoundingBox* bounds);
+		BoundingBox* getBoundingBox();
+
+		void SetStatic(bool status);
+		bool IsStatic();
+
 	protected:
 		std::string _name;
 		glm::mat4 _transform;
@@ -79,6 +87,9 @@ class GameObject
 		AbstractBehaviour* _behaviour;
 		AbstractMaterial* _material;
 		World* _world;
+		BoundingBox* _bounds;
+
+		bool _isStatic;
 
         //update children list administration
         void _innerAdd (GameObject* pChild);

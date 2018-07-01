@@ -115,7 +115,8 @@
     <ClInclude Include="..\src\mge\octree\OctreeWorld.h">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\mge\octree\OctreeNode.h">
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\src\mge\octree\BoundingBox.h">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClInclude>
   </ItemGroup>
@@ -198,7 +199,7 @@
     <ClCompile Include="..\src\mge\octree\OctreeWorld.cpp">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\mge\octree\OctreeNode.cpp">
+    <ClCompile Include="..\src\mge\octree\BoundingBox.cpp">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClCompile>
   </ItemGroup>
@@ -239,5 +240,8 @@
     <None Include="..\assets\mge\shaders\terrain.vs">
       <Filter>Assets\mge\shaders</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="mge.rc" />
   </ItemGroup>
 </Project>

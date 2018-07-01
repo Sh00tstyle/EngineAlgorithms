@@ -4,7 +4,7 @@
 
 GameObject::GameObject(const std::string& pName, const glm::vec3& pPosition )
 :	_name( pName ), _transform( glm::translate( pPosition ) ), _parent(nullptr), _children(),
-    _mesh( nullptr ),_behaviour( nullptr ), _material(nullptr), _world(nullptr)
+    _mesh( nullptr ),_behaviour( nullptr ), _material(nullptr), _world(nullptr), _bounds(nullptr), _isStatic(false)
 
 {
 }
@@ -21,6 +21,8 @@ GameObject::~GameObject()
     }
 
     //do not forget to delete behaviour, material, mesh, collider manually if required!
+
+	delete _bounds;
 }
 
 void GameObject::setName (const std::string& pName)
@@ -194,5 +196,21 @@ int GameObject::getChildCount() const {
 
 GameObject* GameObject::getChildAt(int pIndex) const {
     return _children[pIndex];
+}
+
+void GameObject::setBoundingBox(BoundingBox * bounds) {
+	_bounds = bounds;
+}
+
+BoundingBox * GameObject::getBoundingBox() {
+	return _bounds;
+}
+
+void GameObject::SetStatic(bool status) {
+	_isStatic = status;
+}
+
+bool GameObject::IsStatic() {
+	return _isStatic;
 }
 

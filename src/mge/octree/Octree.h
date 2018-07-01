@@ -1,21 +1,31 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
-class OctreeNode;
+#include <vector>;
+
+class BoundingBox;
+class GameObject;
 
 class Octree {
 	public:
-		Octree(float pHalfSize, float pHeight, int pDepth = 1);
+		Octree(BoundingBox* pBounds, int pDepth = 0, Octree* pParentNode = nullptr);
 		~Octree();
 
-	private:
-		OctreeNode * _childNodes[8]; //eight possible nodes
+		void addObject(GameObject* newObject);
+		void updateTree();
+		
 
-		float _halfSize;
-		float _height;
+	private:
+		static int TOTAL_DEPTH;
+
+		BoundingBox* _bounds;
+		Octree* _childNodes[8]; //eight possible nodes
+		Octree* _parentNode;
+		std::vector<GameObject*> _objects;
 		int _depth;
 
-		void InitOctree();
+		void initOctree(int depth);
+		void destructTree();
 
 };
 

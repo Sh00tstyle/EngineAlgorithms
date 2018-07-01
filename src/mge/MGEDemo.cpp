@@ -22,6 +22,8 @@
 #include "mge/behaviours/KeysBehaviour.hpp"
 #include "mge/behaviours/LightControlBehaviour.hpp"
 
+#include "mge/octree/BoundingBox.h"
+
 #include "mge/util/DebugHud.hpp"
 
 #include "mge/octree/OctreeWorld.h"
