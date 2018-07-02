@@ -70,8 +70,6 @@ void MGEDemo::_initializeScene() {
 		pos = glm::vec3((i - 3) * 3, 3, 3);
 
 		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
-		newCube->setMesh(cubeMeshF);
-		newCube->setMaterial(whiteColorMat);
 		newCube->setBoundingBox(new BoundingBox(newCube, glm::vec3(1, 1, 1))); //add collider to make it work
 
 		if(i == 0) newCube->setBehaviour(new KeysBehaviour());

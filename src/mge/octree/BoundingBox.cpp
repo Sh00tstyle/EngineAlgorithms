@@ -1,5 +1,6 @@
 #include "BoundingBox.h"
 #include "mge\core\GameObject.hpp"
+#include "mge/core/LineRenderer.hpp"
 
 BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize) {
 	//stationary bounds for the octree
@@ -11,7 +12,7 @@ BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize) {
 BoundingBox::BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize) {
 	//dynamic bounds for object that might move (but can be set to static)
 	_owner = pOwner;
-	_center = _owner->getWorldPosition();
+	_center = _owner->getLocalPosition();
 	_halfSize = pHalfSize;
 }
 
@@ -39,6 +40,8 @@ glm::vec3 BoundingBox::getMax() {
 
 bool BoundingBox::contains(BoundingBox * other) {
 	//AABB collision essentially
+
+	//replace with this https://stackoverflow.com/questions/18295825/determine-if-point-is-within-bounding-box in the future
 
 	glm::vec3 min = getMin();
 	glm::vec3 max = getMax();

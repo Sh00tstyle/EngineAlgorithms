@@ -10,6 +10,7 @@ class AbstractMaterial;
 class World;
 class Mesh;
 class BoundingBox;
+class LineRenderer;
 
 /**
  * A GameObject wraps all data required to display an object, but knows nothing about OpenGL or rendering.
@@ -73,6 +74,8 @@ class GameObject
 		void setBoundingBox(BoundingBox* bounds);
 		BoundingBox* getBoundingBox();
 
+		LineRenderer* getColliderRenderer();
+
 		void setStatic(bool status);
 		bool isStatic();
 
@@ -88,6 +91,7 @@ class GameObject
 		AbstractMaterial* _material;
 		World* _world;
 		BoundingBox* _bounds;
+		LineRenderer* _colliderRenderer;
 
 		bool _isStatic;
 

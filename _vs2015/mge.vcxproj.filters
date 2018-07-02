@@ -119,6 +119,9 @@
     <ClInclude Include="..\src\mge\octree\BoundingBox.h">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mge\core\LineRenderer.hpp">
+      <Filter>MGE Source files\mge\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -202,6 +205,9 @@
     <ClCompile Include="..\src\mge\octree\BoundingBox.cpp">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\mge\core\LineRenderer.cpp">
+      <Filter>MGE Source files\mge\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\mge\shaders\color.fs">
@@ -238,6 +244,12 @@
       <Filter>Assets\mge\shaders</Filter>
     </None>
     <None Include="..\assets\mge\shaders\terrain.vs">
+      <Filter>Assets\mge\shaders</Filter>
+    </None>
+    <None Include="..\assets\mge\shaders\line.fs">
+      <Filter>Assets\mge\shaders</Filter>
+    </None>
+    <None Include="..\assets\mge\shaders\line.vs">
       <Filter>Assets\mge\shaders</Filter>
     </None>
   </ItemGroup>

@@ -177,6 +177,7 @@
     <ClInclude Include="..\src\mge\core\Camera.hpp" />
     <ClInclude Include="..\src\mge\core\GameObject.hpp" />
     <ClInclude Include="..\src\mge\core\Light.hpp" />
+    <ClInclude Include="..\src\mge\core\LineRenderer.hpp" />
     <ClInclude Include="..\src\mge\core\Mesh.hpp" />
     <ClInclude Include="..\src\mge\core\Renderer.hpp" />
     <ClInclude Include="..\src\mge\core\ShaderProgram.hpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="..\src\mge\core\Camera.cpp" />
     <ClCompile Include="..\src\mge\core\GameObject.cpp" />
     <ClCompile Include="..\src\mge\core\Light.cpp" />
+    <ClCompile Include="..\src\mge\core\LineRenderer.cpp" />
     <ClCompile Include="..\src\mge\core\Mesh.cpp" />
     <ClCompile Include="..\src\mge\core\Renderer.cpp" />
     <ClCompile Include="..\src\mge\core\ShaderProgram.cpp" />
@@ -229,6 +231,8 @@
     <None Include="..\assets\fragmentshader.fs" />
     <None Include="..\assets\mge\shaders\color.fs" />
     <None Include="..\assets\mge\shaders\color.vs" />
+    <None Include="..\assets\mge\shaders\line.fs" />
+    <None Include="..\assets\mge\shaders\line.vs" />
     <None Include="..\assets\mge\shaders\lit.fs" />
     <None Include="..\assets\mge\shaders\lit.vs" />
     <None Include="..\assets\mge\shaders\terrain.fs" />

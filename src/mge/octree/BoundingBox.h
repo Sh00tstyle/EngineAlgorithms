@@ -4,6 +4,7 @@
 #include <glm.hpp>
 
 class GameObject;
+class LineRenderer;
 
 class BoundingBox {
 

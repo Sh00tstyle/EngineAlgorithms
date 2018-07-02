@@ -1,6 +1,8 @@
 #include <iostream>
 #include "GameObject.hpp"
 #include "mge/behaviours/AbstractBehaviour.hpp"
+#include "mge\octree\BoundingBox.h"
+#include "mge/core/LineRenderer.hpp"
 
 GameObject::GameObject(const std::string& pName, const glm::vec3& pPosition )
 :	_name( pName ), _transform( glm::translate( pPosition ) ), _parent(nullptr), _children(),
@@ -23,6 +25,7 @@ GameObject::~GameObject()
     //do not forget to delete behaviour, material, mesh, collider manually if required!
 
 	delete _bounds;
+	delete _colliderRenderer;
 }
 
 void GameObject::setName (const std::string& pName)
@@ -200,10 +203,16 @@ GameObject* GameObject::getChildAt(int pIndex) const {
 
 void GameObject::setBoundingBox(BoundingBox * bounds) {
 	_bounds = bounds;
+
+	_colliderRenderer = new LineRenderer(bounds);
 }
 
 BoundingBox * GameObject::getBoundingBox() {
 	return _bounds;
+}
+
+LineRenderer * GameObject::getColliderRenderer() {
+	return _colliderRenderer;
 }
 
 void GameObject::setStatic(bool status) {

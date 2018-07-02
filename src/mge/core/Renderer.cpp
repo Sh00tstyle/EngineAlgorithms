@@ -4,6 +4,7 @@
 #include "Mesh.hpp"
 #include "World.hpp"
 #include "mge/materials/AbstractMaterial.hpp"
+#include "mge/core/LineRenderer.hpp"
 
 Renderer::Renderer():debug(false)
 {
@@ -59,7 +60,7 @@ void Renderer::render(World* pWorld, GameObject* pGameObject, AbstractMaterial* 
 }
 
 void Renderer::renderSelf(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
-	render(pWorld, pGameObject->getMesh(), pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
+	render(pWorld, pGameObject->getMesh(), pGameObject->getColliderRenderer(), pMaterial, pModelMatrix, pViewMatrix, pProjectionMatrix);
 	if (debug) renderMeshDebugInfo(pGameObject->getMesh(), pModelMatrix, pViewMatrix, pProjectionMatrix);
 }
 
@@ -75,8 +76,9 @@ void Renderer::renderChildren(World* pWorld, GameObject* pGameObject, AbstractMa
 	}
 }
 
-void Renderer::render(World* pWorld, Mesh* pMesh, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
+void Renderer::render(World* pWorld, Mesh* pMesh, LineRenderer* pLines, AbstractMaterial* pMaterial, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
 	if (pMesh != nullptr && pMaterial != nullptr) pMaterial->render(pWorld, pMesh, pModelMatrix, pViewMatrix, pProjectionMatrix);
+	if(pLines != nullptr) pLines->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
 }
 
 void Renderer::renderMeshDebugInfo(Mesh* pMesh, const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
