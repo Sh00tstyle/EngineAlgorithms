@@ -122,6 +122,9 @@
     <ClInclude Include="..\src\mge\core\LineRenderer.hpp">
       <Filter>MGE Source files\mge\core</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mge\behaviours\MovingBehaviour.hpp">
+      <Filter>MGE Source files\mge\behaviours</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -207,6 +210,9 @@
     </ClCompile>
     <ClCompile Include="..\src\mge\core\LineRenderer.cpp">
       <Filter>MGE Source files\mge\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\behaviours\MovingBehaviour.cpp">
+      <Filter>MGE Source files\mge\behaviours</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

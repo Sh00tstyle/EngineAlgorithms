@@ -14,10 +14,16 @@ class OctreeWorld : public World {
 		virtual void update(float step);
 
 		virtual void add(GameObject* pChild);
+
 		void updateOctree();
+		void renderOctree(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
+
+		glm::vec3 getOctreeHalfSize();
 
 	private:
 		Octree* _octree;
+
+		glm::vec3 _octreeHalfSize;
 
 };
 

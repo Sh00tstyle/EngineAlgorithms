@@ -5,6 +5,7 @@
 #include "glm.hpp"
 
 class World;
+class OctreeWorld;
 class GameObject;
 class Mesh;
 class AbstractMaterial;
@@ -33,7 +34,7 @@ public:
 	 * Convenience method to render whole world, visits each gameobject in the world recursively,
 	 * using each gameobject's mesh & material, and the world's main camera.
 	 */
-	void render(World* pWorld);
+	void render(OctreeWorld* pWorld);
 
 	/**
 	 * Renders a specific GameObject in the world using a specific camera.

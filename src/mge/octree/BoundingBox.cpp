@@ -25,7 +25,7 @@ glm::vec3 BoundingBox::getHalfSize() {
 
 glm::vec3 BoundingBox::getCenter() {
 	//only update the center if we have an owner and it is not static
-	if(_owner != nullptr && !_owner->isStatic()) _center = _owner->getWorldPosition();
+	if(_owner != nullptr && !_owner->isStatic()) _center = _owner->getLocalPosition();
 
 	return _center;
 }
@@ -36,25 +36,6 @@ glm::vec3 BoundingBox::getMin() {
 
 glm::vec3 BoundingBox::getMax() {
 	return getCenter() + getHalfSize();
-}
-
-bool BoundingBox::contains(BoundingBox * other) {
-	//AABB collision essentially
-
-	//replace with this https://stackoverflow.com/questions/18295825/determine-if-point-is-within-bounding-box in the future
-
-	glm::vec3 min = getMin();
-	glm::vec3 max = getMax();
-
-	glm::vec3 otherMin = other->getMin();
-	glm::vec3 otherMax = other->getMax();
-
-	return (max.x > otherMin.x &&
-			min.x < otherMax.x &&
-			max.y > otherMin.y &&
-			min.y < otherMax.y &&
-			max.z > otherMin.z &&
-			min.z < otherMax.z);
 }
 
 GameObject* BoundingBox::getOwner() {

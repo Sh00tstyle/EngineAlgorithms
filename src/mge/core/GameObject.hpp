@@ -7,6 +7,7 @@
 class AbstractCollider;
 class AbstractBehaviour;
 class AbstractMaterial;
+class MovingBehaviour;
 class World;
 class Mesh;
 class BoundingBox;
@@ -76,6 +77,9 @@ class GameObject
 
 		LineRenderer* getColliderRenderer();
 
+		void setMovingBehaviour(MovingBehaviour* behaviour);
+		MovingBehaviour* getMovingBehaviour();
+
 		void setStatic(bool status);
 		bool isStatic();
 
@@ -92,6 +96,7 @@ class GameObject
 		World* _world;
 		BoundingBox* _bounds;
 		LineRenderer* _colliderRenderer;
+		MovingBehaviour* _movingBehaviour;
 
 		bool _isStatic;
 

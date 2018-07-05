@@ -3,6 +3,8 @@
 #include "OctreeWorld.h"
 #include "Octree.h"
 #include "BoundingBox.h"
+#include "mge\core/LineRenderer.hpp"
+#include "mge/behaviours/MovingBehaviour.hpp"
 
 int Octree::TOTAL_DEPTH = 0; //init static depth member
 
@@ -10,11 +12,14 @@ Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bound
 	if(_parentNode == nullptr) TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
 	_depth = TOTAL_DEPTH - pDepth; //depth of the node itself
 
-	initOctree(pDepth); //build octree for the first time, since it is the root node
+	_octantRenderer = new LineRenderer(_bounds, true);
+	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
+
+	_initOctree(pDepth); //build octree for the first time, since it is the root node
 }
 
 Octree::~Octree() {
-	destructOctree(); //remove all child nodes if there are any
+	_destructOctree(); //remove all child nodes if there are any
 }
 
 void Octree::addObject(GameObject * newObject) {
@@ -23,7 +28,7 @@ void Octree::addObject(GameObject * newObject) {
 
 //returns true, if the node could store the object otherwise returns false
 bool Octree::updateNodes(GameObject* gameObject) {
-	if(_bounds->contains(gameObject->getBoundingBox())) {
+	if(_contains(gameObject->getLocalPosition())) {
 		if(_depth < TOTAL_DEPTH) {
 			//gameobject is in the current octant, but check for children
 			for(int i = 0; i < 8; i++) {
@@ -62,8 +67,12 @@ void Octree::checkCollisions() {
 				if(j == i) continue; //avoid checking against itself
 
 				//collision detection calculation
-				if(isColliding(_objects[i]->getBoundingBox(), _objects[j]->getBoundingBox())) {
-					std::cout << "Collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
+				if(_isColliding(_objects[i]->getBoundingBox(), _objects[j]->getBoundingBox())) {
+					//register collisions in the behaviours
+					_objects[i]->getMovingBehaviour()->onCollision(_objects[j]->getBoundingBox());
+					//_objects[j]->getMovingBehaviour()->onCollision(_objects[i]->getBoundingBox());
+
+					std::cout << "collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
 				}
 			}
 		}
@@ -77,7 +86,35 @@ void Octree::checkCollisions() {
 	}
 }
 
-void Octree::initOctree(int depth) {
+void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
+	if(_objects.size() <= 0) _octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue, when there are no objects are in the octant
+	else _octantRenderer->setLineColor(glm::vec4(0.5f, 0.0f, 0.0f, 1.0f)); //purple, when there are objectics in the octant
+
+	//render self
+	_octantRenderer->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
+
+	if(_depth >= TOTAL_DEPTH) return;
+
+	//render children
+	for(int i = 0; i < 8; i++) {
+		_childNodes[i]->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
+	}
+}
+
+bool Octree::_contains(glm::vec3 otherPos) {
+	//returns true, if the center of the other object is in the boundaries of the current octant
+	glm::vec3 min = _bounds->getMin();
+	glm::vec3 max = _bounds->getMax();
+
+	return (otherPos.x > min.x &&
+			otherPos.x < max.x &&
+			otherPos.y > min.y &&
+			otherPos.y < max.y &&
+			otherPos.z > min.z &&
+			otherPos.z < max.z);
+}
+
+void Octree::_initOctree(int depth) {
 	if(depth <= 0) return; //stop constructing
 
 	//new octant areas for the child nodes
@@ -102,17 +139,34 @@ void Octree::initOctree(int depth) {
 	}
 }
 
-void Octree::destructOctree() {
+void Octree::_destructOctree() {
 	if(_depth >= TOTAL_DEPTH) return; //dont destruct if there is no depth left
 
 	for(unsigned int i = 0; i < 8; i++) {
 		delete _childNodes[i];
 	}
+
+	delete _octantRenderer;
 }
 
-bool Octree::isColliding(BoundingBox * one, BoundingBox * other) {
-	//OBB vs OBB 
+bool Octree::_isColliding(BoundingBox * one, BoundingBox * other) {
+	/**/
+	//AABB vs AABB 
+	glm::vec3 oneMin = one->getMin();
+	glm::vec3 oneMax = one->getMax();
 
+	glm::vec3 otherMin = other->getMin();
+	glm::vec3 otherMax = other->getMax();
+
+	return (oneMax.x > otherMin.x &&
+			oneMin.x < otherMax.x &&
+			oneMax.y > otherMin.y &&
+			oneMin.y < otherMax.y &&
+			oneMax.z > otherMin.z &&
+			oneMin.z < otherMax.z);
+
+	/**
+	//OBB vs OBB 
 	glm::vec3 oneCenter = one->getCenter(); // object's pos = collider center
 	glm::mat4 oneTransform = one->getOwner()->getTransform(); // scaling for halfsize
 	glm::vec3 otherCenter = other->getCenter();
@@ -158,4 +212,5 @@ bool Octree::isColliding(BoundingBox * one, BoundingBox * other) {
 	}
 
 	return true;
+	/**/
 }

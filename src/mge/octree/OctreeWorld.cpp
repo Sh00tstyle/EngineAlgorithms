@@ -5,10 +5,9 @@
 #include "mge/octree/BoundingBox.h"
 
 OctreeWorld::OctreeWorld():World() {
-	glm::vec3 position = glm::vec3(0, 0, 0);
-	glm::vec3 halfSize = glm::vec3(100, 100, 100);
+	_octreeHalfSize = glm::vec3(50, 50, 50);
 
-	_octree = new Octree(new BoundingBox(position, halfSize), 2);
+	_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), _octreeHalfSize), 3);
 }
 
 OctreeWorld::~OctreeWorld() {
@@ -18,6 +17,7 @@ OctreeWorld::~OctreeWorld() {
 void OctreeWorld::update(float step) {
 	GameObject::update(step); //base class update
 
+	updateOctree(); //update octree every frame (costly)
 	_octree->checkCollisions();
 }
 
@@ -38,4 +38,12 @@ void OctreeWorld::updateOctree() {
 			if(!_octree->updateNodes(getChildAt(i))) _octree->addObject(child); //add to the root, if it coudnt be added somewhere else
 		}
 	}
+}
+
+void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
+	_octree->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
+}
+
+glm::vec3 OctreeWorld::getOctreeHalfSize() {
+	return _octreeHalfSize;
 }

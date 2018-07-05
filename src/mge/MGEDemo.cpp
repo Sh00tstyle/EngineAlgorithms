@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 
 #include "glm.hpp"
 
@@ -21,6 +22,7 @@
 #include "mge/behaviours/RotatingBehaviour.hpp"
 #include "mge/behaviours/KeysBehaviour.hpp"
 #include "mge/behaviours/LightControlBehaviour.hpp"
+#include "mge/behaviours/MovingBehaviour.hpp"
 
 #include "mge/octree/BoundingBox.h"
 
@@ -58,21 +60,47 @@ void MGEDemo::_initializeScene() {
 	AbstractMaterial* whiteColorMat = new ColorMaterial(glm::vec3(1, 1, 1));
 
 	//Gameobjects
-	Camera* camera = new Camera("camera", glm::vec3(0, 5, 25));
+	Camera* camera = new Camera("camera", glm::vec3(0, 0, 150));
+	camera->setBehaviour(new KeysBehaviour(10.0f));
 	_world->add(camera);
 	_world->setMainCamera(camera);
 
 	//Testing
-	int cubeAmt = 5;
+	int cubeAmt = 80;
+	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
 	glm::vec3 pos;
+	glm::vec3 dir;
+	float speed = 10.0f;
 
+	srand(0); //seed for the randomizer
+
+	//create testing objects
 	for(int i = 0; i < cubeAmt; i++) {
-		pos = glm::vec3((i - 3) * 3, 3, 3);
+		//randomize position based on the octree bounds
+		int xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
+		int yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
+		int zPos = rand() % (int)(octreeHalfSize.z * 2) - octreeHalfSize.z;
+
+		pos = glm::vec3(xPos, yPos, zPos);
+
+		//randomize direction and speed
+		int xDir = rand() % 5 - 2;
+		int yDir = rand() % 5 - 2;
+		int zDir = rand() % 5 - 2;
+
+		//dont allow 0 magnitude directions
+		while(xDir == 0 && yDir == 0 && zDir == 0) {
+			xDir = rand() % 2 - 1;
+			yDir = rand() % 2 - 1;
+			zDir = rand() % 2 - 1;
+		}
+
+		dir = glm::vec3(xDir, yDir, zDir);
 
 		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
 		newCube->setBoundingBox(new BoundingBox(newCube, glm::vec3(1, 1, 1))); //add collider to make it work
-
-		if(i == 0) newCube->setBehaviour(new KeysBehaviour());
+		newCube->setMovingBehaviour(new MovingBehaviour(dir, speed, octreeHalfSize)); //just a reference holder basically
+		newCube->setBehaviour(newCube->getMovingBehaviour()); //gets updated
 
 		_world->add(newCube); //also adding to the octree
 	}
@@ -86,21 +114,6 @@ void MGEDemo::_render() {
 void MGEDemo::_updateHud() {
 	std::string debugInfo = "";
 	debugInfo += std::string("FPS:") + std::to_string((int)_fps) + "\n";
-
-	//Adding the hierarchy and the parent of everything (the world)
-	debugInfo += "\n\n" + std::string("Hierarchy:") + "\n" + _world->getName();
-
-	//getting every children in the world object and printing it
-	for(int i = 0; i < _world->getChildCount(); i++) {
-		debugInfo += "\n\t" + _world->getChildAt(i)->getName();
-
-		for(int j = 0; j < _world->getChildAt(i)->getChildCount(); j++) {
-			debugInfo += "\n\t\t" + _world->getChildAt(i)->getChildAt(j)->getName();
-
-			//could potentially get every children of those gameobjects and print their children too, if there were any but 2 iterations is enough for now
-			//solution for more and easier iteration would be recursion
-		}
-	}
 
 	_hud->setDebugInfo(debugInfo);
 	_hud->draw();

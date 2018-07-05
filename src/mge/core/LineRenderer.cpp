@@ -10,47 +10,68 @@
 
 ShaderProgram* LineRenderer::_shader = nullptr;
 
-LineRenderer::LineRenderer(BoundingBox* pBounds) {
-	_generateVertices(pBounds);
+LineRenderer::LineRenderer(BoundingBox* pBounds, bool pIsOctree) {
+	//init the line renderer
+	_generateVertices(pBounds, pIsOctree);
+	_lineColor = glm::vec4(0.25f, 1.0f, 0.0f, 1.0f); //green
 
 	_initShader();
 	_buffer();
 }
 
 LineRenderer::~LineRenderer() {
-	//dtor
 }
 
 void LineRenderer::render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {
-	/*_shader->use();
+	//use the line shader
+	_shader->use();
 
-	//set the material color
-	glUniform3fv(_shader->getUniformLocation("diffuseColor"), 1, glm::value_ptr(glm::vec3(1, 1, 1))); //TODO: set color for lines (?)
-
-	//pass in all MVP matrices separately
+	//pass in all matrices for the MVP matrix seperately
 	glUniformMatrix4fv(_shader->getUniformLocation("projectionMatrix"), 1, GL_FALSE, glm::value_ptr(pProjectionMatrix));
 	glUniformMatrix4fv(_shader->getUniformLocation("viewMatrix"), 1, GL_FALSE, glm::value_ptr(pViewMatrix));
-	glUniformMatrix4fv(_shader->getUniformLocation("modelMatrix"), 1, GL_FALSE, glm::value_ptr(pModelMatrix));*/
+	glUniformMatrix4fv(_shader->getUniformLocation("modelMatrix"), 1, GL_FALSE, glm::value_ptr(pModelMatrix));
 
-	//now inform mesh of where to stream its data
-	_streamToOpenGL();
+	//pass in line color
+	glUniform4fv(_shader->getUniformLocation("lineColor"), 1, glm::value_ptr(_lineColor));
+
+	//use vertex array
+	glBindVertexArray(_vao);
+
+	//draw lines from the vao based on the amount of positions in the vertex array
+	glDrawArrays(GL_LINES, 0, sizeof(_vertices) / sizeof(*_vertices) / 3);
+
+	//unbind
+	glBindVertexArray(0);
 }
 
-
+void LineRenderer::setLineColor(glm::vec4 color) {
+	_lineColor = color;
+}
 
 void LineRenderer::_buffer() {
-	glGenBuffers(1, &_indexBufferId);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBufferId);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0], GL_STATIC_DRAW);
+	//generate vertex buffer object to store the vertex information
+	glGenBuffers(1, &_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-	glGenBuffers(1, &_vertexBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferId);
-	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(glm::vec3), &_vertices[0], GL_STATIC_DRAW);
+	//allocate video memory and store the data in the buffer
+	glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
 
+	//generate and bind vertex array object
+	glGenVertexArrays(1, &_vao);
+	glBindVertexArray(_vao);
+
+	//get the index for the vertex attribute and store the information in the currently bound vao
+	GLint vertexAttrib = _shader->getAttribLocation("vertex");
+	glEnableVertexAttribArray(vertexAttrib);
+	glVertexAttribPointer(vertexAttrib, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	//unbind the vao and vbo to avoid errors
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void LineRenderer::_initShader() {
+	//lazy init shader, so create it if it doesnt exist already
 	if(_shader == nullptr) {
 		_shader = new ShaderProgram();
 		_shader->addShader(GL_VERTEX_SHADER, config::MGE_SHADER_PATH + "line.vs");
@@ -59,12 +80,13 @@ void LineRenderer::_initShader() {
 	}
 }
 
-void LineRenderer::_generateVertices(BoundingBox * bounds) {
-	//store relevant bound data
-	glm::vec3 center = bounds->getCenter();
+void LineRenderer::_generateVertices(BoundingBox * bounds, bool isOctree) {
+	// store relevant boundary data
+	glm::vec3 center = glm::vec3(0, 0, 0);
+	if(isOctree) center = bounds->getCenter();
 	glm::vec3 halfSize = bounds->getHalfSize();
 
-	//calculate edge points
+	//calculate edge points in local space
 	glm::vec3 v1 = center + glm::vec3(-halfSize.x, -halfSize.y, -halfSize.z); //back, bottom, left
 	glm::vec3 v2 = center + glm::vec3(halfSize.x, -halfSize.y, -halfSize.z); //back, bottom, right
 	glm::vec3 v3 = center + glm::vec3(-halfSize.x, -halfSize.y, halfSize.z); //front, bottom, left
@@ -74,45 +96,22 @@ void LineRenderer::_generateVertices(BoundingBox * bounds) {
 	glm::vec3 v7 = center + glm::vec3(-halfSize.x, halfSize.y, halfSize.z); //front, top, left
 	glm::vec3 v8 = center + glm::vec3(halfSize.x, halfSize.y, halfSize.z); //front, top, right
 
-	_vertices.clear();
-
-	//store in list
-	glm::vec3 vertices[24] = {
-		v1, v2,
-		v1, v3,
-		v2, v4,
-		v3, v4,
-		v5, v6,
-		v5, v7,
-		v6, v8,
-		v7, v8,
-		v1, v5,
-		v2, v6,
-		v3, v7,
-		v4, v8
+    //store in array with render order
+	GLfloat vertices[] = {
+		v1.x, v1.y, v1.z, v2.x, v2.y, v2.z,
+		v1.x, v1.y, v1.z, v3.x, v3.y, v3.z,
+		v2.x, v2.y, v2.z, v4.x, v4.y, v4.z,
+		v3.x, v3.y, v3.z, v4.x, v4.y, v4.z,
+		v5.x, v5.y, v5.z, v6.x, v6.y, v6.z,
+		v5.x, v5.y, v5.z, v7.x, v7.y, v7.z,
+		v6.x, v6.y, v6.z, v8.x, v8.y, v8.z,
+		v7.x, v7.y, v7.z, v8.x, v8.y, v8.z,
+		v1.x, v1.y, v1.z, v5.x, v5.y, v5.z,
+		v2.x, v2.y, v2.z, v6.x, v6.y, v6.z,
+		v3.x, v3.y, v3.z, v7.x, v7.y, v7.z,
+		v4.x, v4.y, v4.z, v8.x, v8.y, v8.z
 	};
 
-	for(int i = 0; i < sizeof(vertices); i++) {
-		_vertices.push_back(vertices[i]);
-	}
-
-	//init indices (?)
-	for(int i = 0; i < _vertices.size(); i++) {
-		_indices.push_back(i);
-	}
-}
-
-void LineRenderer::_streamToOpenGL() {
-	glBegin(GL_LINES);
-
-	/**
-	for(unsigned i = 0; i < _vertices.size(); i++) {
-		//draw line
-		glm::vec3 vertex = _vertices[i];
-		glVertex3fv(glm::value_ptr(vertex));
-
-	}
-	/**/
-
-	glEnd();
+	//copy local array to member array
+	std::copy(std::begin(vertices), std::end(vertices), std::begin(_vertices));
 }

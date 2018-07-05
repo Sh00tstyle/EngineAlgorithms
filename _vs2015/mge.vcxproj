@@ -171,6 +171,7 @@
     <ClInclude Include="..\src\mge\behaviours\CameraOrbitBehaviour.h" />
     <ClInclude Include="..\src\mge\behaviours\KeysBehaviour.hpp" />
     <ClInclude Include="..\src\mge\behaviours\LightControlBehaviour.hpp" />
+    <ClInclude Include="..\src\mge\behaviours\MovingBehaviour.hpp" />
     <ClInclude Include="..\src\mge\behaviours\RotatingBehaviour.hpp" />
     <ClInclude Include="..\src\mge\config.hpp" />
     <ClInclude Include="..\src\mge\core\AbstractGame.hpp" />
@@ -203,6 +204,7 @@
     <ClCompile Include="..\src\mge\behaviours\CameraOrbitBehaviour.cpp" />
     <ClCompile Include="..\src\mge\behaviours\KeysBehaviour.cpp" />
     <ClCompile Include="..\src\mge\behaviours\LightControlBehaviour.cpp" />
+    <ClCompile Include="..\src\mge\behaviours\MovingBehaviour.cpp" />
     <ClCompile Include="..\src\mge\behaviours\RotatingBehaviour.cpp" />
     <ClCompile Include="..\src\mge\core\AbstractGame.cpp" />
     <ClCompile Include="..\src\mge\core\Camera.cpp" />

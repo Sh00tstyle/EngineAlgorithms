@@ -5,6 +5,7 @@
 #include "World.hpp"
 #include "mge/materials/AbstractMaterial.hpp"
 #include "mge/core/LineRenderer.hpp"
+#include "mge/octree/OctreeWorld.h"
 
 Renderer::Renderer():debug(false)
 {
@@ -45,8 +46,10 @@ void Renderer::setClearColor(int red, int green, int blue, int alpha) {
 	glClearColor(red / 255.0f, green / 255.0f, blue / 255.0f, alpha / 255.0f);
 }
 
-void Renderer::render(World* pWorld) {
-	render(pWorld, pWorld, nullptr, pWorld->getMainCamera(), true);
+void Renderer::render(OctreeWorld* pWorld) {
+	Camera* camera = pWorld->getMainCamera();
+	render(pWorld, pWorld, nullptr, camera, true);
+	pWorld->renderOctree(pWorld->getWorldTransform(), glm::inverse(camera->getWorldTransform()), camera->getProjection()); //render the octree
 }
 
 void Renderer::render(World* pWorld, GameObject* pGameObject, AbstractMaterial* pMaterial, Camera* pCamera, bool pRecursive)

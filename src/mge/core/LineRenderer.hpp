@@ -12,30 +12,27 @@ class ShaderProgram;
 class LineRenderer
 {
 	public:
-		LineRenderer(BoundingBox* pBounds);
+		LineRenderer(BoundingBox* pBounds, bool pIsOctree = false);
 		~LineRenderer();
 
 		void render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
 
+		void setLineColor(glm::vec4 color);
+
 	private:
 		static ShaderProgram* _shader;
 
-		GLuint _indexBufferId;
-		GLuint _vertexBufferId;
+		GLfloat _vertices[72]; //vertex position data
 
-	    //the actual data
-		std::vector<unsigned> _indices;
-		std::vector<glm::vec3> _vertices;       //vec3 with 3d coords for all vertices
+		GLuint _vbo; //vertex buffer object
+		GLuint _vao; //vertex array object
 
-        //buffer vertices, normals, and uv's
-		void _buffer();
+		glm::vec4 _lineColor;
+       
+		void _buffer(); //buffer vertices
+		void _initShader(); //lazy init the shader (create if it doesnt exist)
 
-		void _initShader();
-
-		//generate vertices from a cube
-		void _generateVertices(BoundingBox* bounds);
-
-		void _streamToOpenGL();
+		void _generateVertices(BoundingBox* bounds, bool isOctree = false); //generate vertices from a cube
 };
 
-#endif // LINEMESH_HPP
+#endif // LINERENDERER_HPP

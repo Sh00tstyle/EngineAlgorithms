@@ -21,8 +21,6 @@ class BoundingBox {
 		glm::vec3 getMin();
 		glm::vec3 getMax();
 
-		bool contains(BoundingBox* other);
-
 		//access to the gameobject (maybe not needed)
 		GameObject* getOwner();
 

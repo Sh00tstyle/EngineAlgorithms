@@ -6,7 +6,7 @@
 
 GameObject::GameObject(const std::string& pName, const glm::vec3& pPosition )
 :	_name( pName ), _transform( glm::translate( pPosition ) ), _parent(nullptr), _children(),
-    _mesh( nullptr ),_behaviour( nullptr ), _material(nullptr), _world(nullptr), _bounds(nullptr), _isStatic(false)
+    _mesh( nullptr ),_behaviour( nullptr ), _material(nullptr), _world(nullptr), _bounds(nullptr), _colliderRenderer(nullptr), _isStatic(false)
 
 {
 }
@@ -213,6 +213,14 @@ BoundingBox * GameObject::getBoundingBox() {
 
 LineRenderer * GameObject::getColliderRenderer() {
 	return _colliderRenderer;
+}
+
+void GameObject::setMovingBehaviour(MovingBehaviour * behaviour) {
+	_movingBehaviour = behaviour;
+}
+
+MovingBehaviour * GameObject::getMovingBehaviour() {
+	return _movingBehaviour;
 }
 
 void GameObject::setStatic(bool status) {
