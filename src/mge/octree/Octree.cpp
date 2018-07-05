@@ -5,12 +5,17 @@
 #include "BoundingBox.h"
 #include "mge\core/LineRenderer.hpp"
 #include "mge/behaviours/MovingBehaviour.hpp"
+#include "mge/util/TestLog.h"
 
 int Octree::TOTAL_DEPTH = 0; //init static depth member
 
 Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode) {
-	if(_parentNode == nullptr) TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
-	_depth = TOTAL_DEPTH - pDepth; //depth of the node itself
+	if(_parentNode == nullptr) {
+		TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
+		TestLog::octreeDepth = TOTAL_DEPTH;
+	} else {
+		_depth = TOTAL_DEPTH - pDepth; //depth of the node itself
+	}
 
 	_octantRenderer = new LineRenderer(_bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
@@ -66,6 +71,8 @@ void Octree::checkCollisions() {
 			for(unsigned j = i; j < _objects.size(); j++) {
 				if(j == i) continue; //avoid checking against itself
 
+				TestLog::collisionChecks++;
+
 				//collision detection calculation
 				if(_isColliding(_objects[i]->getBoundingBox(), _objects[j]->getBoundingBox())) {
 					//register collisions in the behaviours
@@ -73,6 +80,7 @@ void Octree::checkCollisions() {
 					//_objects[j]->getMovingBehaviour()->onCollision(_objects[i]->getBoundingBox());
 
 					std::cout << "collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
+					TestLog::collisions++;
 				}
 			}
 		}
@@ -105,6 +113,8 @@ bool Octree::_contains(glm::vec3 otherPos) {
 	//returns true, if the center of the other object is in the boundaries of the current octant
 	glm::vec3 min = _bounds->getMin();
 	glm::vec3 max = _bounds->getMax();
+
+	TestLog::fitTests++;
 
 	return (otherPos.x > min.x &&
 			otherPos.x < max.x &&
@@ -166,7 +176,7 @@ bool Octree::_isColliding(BoundingBox * one, BoundingBox * other) {
 			oneMin.z < otherMax.z);
 
 	/**
-	//OBB vs OBB 
+	//OBB vs OBB
 	glm::vec3 oneCenter = one->getCenter(); // object's pos = collider center
 	glm::mat4 oneTransform = one->getOwner()->getTransform(); // scaling for halfsize
 	glm::vec3 otherCenter = other->getCenter();

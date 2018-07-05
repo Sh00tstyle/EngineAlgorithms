@@ -122,6 +122,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glew32sd.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;gdi32.lib;openal32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|Win32'">
@@ -191,10 +192,13 @@
     <ClInclude Include="..\src\mge\materials\TextureMaterial.hpp" />
     <ClInclude Include="..\src\mge\materials\WobblingMaterial.h" />
     <ClInclude Include="..\src\mge\MGEDemo.hpp" />
+    <ClInclude Include="..\src\mge\octree\AABB.h" />
     <ClInclude Include="..\src\mge\octree\BoundingBox.h" />
+    <ClInclude Include="..\src\mge\octree\OBB.h" />
     <ClInclude Include="..\src\mge\octree\Octree.h" />
     <ClInclude Include="..\src\mge\octree\OctreeWorld.h" />
     <ClInclude Include="..\src\mge\util\DebugHud.hpp" />
+    <ClInclude Include="..\src\mge\util\TestLog.h" />
     <ClInclude Include="..\src\ShaderUtil.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -223,10 +227,13 @@
     <ClCompile Include="..\src\mge\materials\TextureMaterial.cpp" />
     <ClCompile Include="..\src\mge\materials\WobblingMaterial.cpp" />
     <ClCompile Include="..\src\mge\MGEDemo.cpp" />
+    <ClCompile Include="..\src\mge\octree\AABB.cpp" />
     <ClCompile Include="..\src\mge\octree\BoundingBox.cpp" />
+    <ClCompile Include="..\src\mge\octree\OBB.cpp" />
     <ClCompile Include="..\src\mge\octree\Octree.cpp" />
     <ClCompile Include="..\src\mge\octree\OctreeWorld.cpp" />
     <ClCompile Include="..\src\mge\util\DebugHud.cpp" />
+    <ClCompile Include="..\src\mge\util\TestLog.cpp" />
     <ClCompile Include="..\src\ShaderUtil.cpp" />
   </ItemGroup>
   <ItemGroup>

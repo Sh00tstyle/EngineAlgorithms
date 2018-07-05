@@ -1,0 +1,27 @@
+FPS: 59
+Objects: 200
+Octree Depth: 0
+Octree Updates: 1976
+Collision Checks: 70250
+Collisions: 471
+Fit Tests: 5412799
+Time: 30.010235
+
+FPS: 59
+Objects: 200
+Octree Depth: 0
+Octree Updates: 1986
+Collision Checks: 70693
+Collisions: 473
+Fit Tests: 5441570
+Time: 29.994616
+
+FPS: 59
+Objects: 200
+Octree Depth: 0
+Octree Updates: 1983
+Collision Checks: 70563
+Collisions: 473
+Fit Tests: 5432892
+Time: 30.003405
+

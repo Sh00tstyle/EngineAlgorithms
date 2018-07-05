@@ -3,6 +3,7 @@
 #include "OctreeWorld.h"
 #include "Octree.h"
 #include "mge/octree/BoundingBox.h"
+#include "mge/util/TestLog.h"
 
 OctreeWorld::OctreeWorld():World() {
 	_octreeHalfSize = glm::vec3(50, 50, 50);
@@ -38,6 +39,8 @@ void OctreeWorld::updateOctree() {
 			if(!_octree->updateNodes(getChildAt(i))) _octree->addObject(child); //add to the root, if it coudnt be added somewhere else
 		}
 	}
+
+	TestLog::octreeUpdates++;
 }
 
 void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {

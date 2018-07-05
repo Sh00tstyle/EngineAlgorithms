@@ -125,6 +125,15 @@
     <ClInclude Include="..\src\mge\behaviours\MovingBehaviour.hpp">
       <Filter>MGE Source files\mge\behaviours</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mge\util\TestLog.h">
+      <Filter>MGE Source files\mge\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mge\octree\AABB.h">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\mge\octree\OBB.h">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -213,6 +222,15 @@
     </ClCompile>
     <ClCompile Include="..\src\mge\behaviours\MovingBehaviour.cpp">
       <Filter>MGE Source files\mge\behaviours</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\util\TestLog.cpp">
+      <Filter>MGE Source files\mge\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\octree\AABB.cpp">
+      <Filter>MGE Source files\mge\octree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\octree\OBB.cpp">
+      <Filter>MGE Source files\mge\octree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

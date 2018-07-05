@@ -34,6 +34,8 @@
 #include "mge/config.hpp"
 #include "mge/MGEDemo.hpp"
 
+#include "mge/util/TestLog.h"
+
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEDemo::MGEDemo() :AbstractGame(), _hud(0) {
 }
@@ -61,12 +63,14 @@ void MGEDemo::_initializeScene() {
 
 	//Gameobjects
 	Camera* camera = new Camera("camera", glm::vec3(0, 0, 150));
-	camera->setBehaviour(new KeysBehaviour(10.0f));
+	camera->setBehaviour(new KeysBehaviour(20.0f));
 	_world->add(camera);
 	_world->setMainCamera(camera);
 
 	//Testing
-	int cubeAmt = 80;
+	TestLog::start();
+	TestLog::objects = 200;
+
 	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
 	glm::vec3 pos;
 	glm::vec3 dir;
@@ -75,7 +79,7 @@ void MGEDemo::_initializeScene() {
 	srand(0); //seed for the randomizer
 
 	//create testing objects
-	for(int i = 0; i < cubeAmt; i++) {
+	for(int i = 0; i < TestLog::objects; i++) {
 		//randomize position based on the octree bounds
 		int xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
 		int yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
@@ -113,7 +117,19 @@ void MGEDemo::_render() {
 
 void MGEDemo::_updateHud() {
 	std::string debugInfo = "";
-	debugInfo += std::string("FPS:") + std::to_string((int)_fps) + "\n";
+
+	//draw info from the tester class
+	debugInfo += std::string("FPS: ") + std::to_string(TestLog::fps) + "\n";
+	debugInfo += std::string("Objects: ") + std::to_string(TestLog::objects) + "\n";
+	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::octreeDepth) + "\n";
+	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::octreeUpdates) + "\n";
+	debugInfo += std::string("Collision Checks: ") + std::to_string(TestLog::collisionChecks) + "\n";
+	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::collisions) + "\n";
+	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::fitTests) + "\n";
+	//debugInfo += std::string("Overlap Tests: ") + std::to_string(TestLog::overlapTests) + "\n";
+	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n\n";
+
+	TestLog::resultInfo = debugInfo;
 
 	_hud->setDebugInfo(debugInfo);
 	_hud->draw();

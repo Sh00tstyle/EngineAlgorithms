@@ -18,6 +18,8 @@ MovingBehaviour::~MovingBehaviour() {
 }
 
 void MovingBehaviour::update(float pStep) {
+	if(_owner->isStatic()) return;
+
 	//moves in the given diretion with the given speed
 	_owner->translate(_direction * _speed * pStep);
 
@@ -40,7 +42,7 @@ void MovingBehaviour::onCollision(BoundingBox * other) {
 	if(_bounds == nullptr) _bounds = _owner->getBoundingBox();
 
 	//resolve collision cheaply (only x)
-	_owner->translate(glm::vec3(2.0f, 0.0f, 0.0f));
+	_owner->translate(glm::vec3(2.0f, 2.0f, 2.0f));
 }
 
 bool MovingBehaviour::_isOutOfBounds() {

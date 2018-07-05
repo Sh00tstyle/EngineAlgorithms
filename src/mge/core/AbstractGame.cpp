@@ -4,6 +4,8 @@
 #include "mge/core/Renderer.hpp"
 #include "mge/octree/OctreeWorld.h"
 
+#include "mge/util/TestLog.h"
+
 AbstractGame::AbstractGame():_window(NULL),_renderer(NULL),_world(NULL), _fps(0)
 {
     //ctor
@@ -96,6 +98,14 @@ void AbstractGame::run()
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
 	while (_window->isOpen()) {
+		//execute test for max 30s
+		if(TestLog::time() >= 30.0f) {
+			TestLog::writeToFile();
+
+			_window->close();
+			return;
+		}
+
 		timeSinceLastUpdate += updateClock.restart();
 
 		if (timeSinceLastUpdate > timePerFrame)
@@ -115,6 +125,7 @@ void AbstractGame::run()
             timeSinceLastFPSCalculation += renderClock.restart().asSeconds();
             if (timeSinceLastFPSCalculation > 1) {
                 _fps = frameCount/timeSinceLastFPSCalculation;
+				TestLog::fps = _fps;
                 timeSinceLastFPSCalculation -= 1;
                 frameCount = 0;
             }
