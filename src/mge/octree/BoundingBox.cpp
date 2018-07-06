@@ -5,6 +5,13 @@
 #include "AABB.h"
 #include "OBB.h"
 
+const glm::mat4 BoundingBox::_AABB_AXES = {
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1
+};
+
 BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize) {
 	//stationary bounds for the octree
 	_owner = nullptr;
@@ -24,7 +31,6 @@ BoundingBox::~BoundingBox() {
 
 bool BoundingBox::isColliding(AABB * one, AABB * other) {
 	//AABB vs AABB 
-
 	glm::vec3 oneMin = one->getMin();
 	glm::vec3 oneMax = one->getMax();
 
@@ -40,11 +46,11 @@ bool BoundingBox::isColliding(AABB * one, AABB * other) {
 }
 
 bool BoundingBox::isColliding(AABB * one, OBB * other) {
-	//AABB vs OBB (TODO)
-	glm::vec3 oneCenter = one->getCenter(); // object's pos = collider center
-	glm::mat4 oneTransform = one->getOwner()->getTransform(); // scaling for halfsize
+	//AABB vs OBB
+	glm::vec3 oneCenter = one->getCenter();
+	glm::mat3 oneTransform = glm::scale(_AABB_AXES, one->getHalfSize()); //no need to use the transform, since its axis alligned anyway
 	glm::vec3 otherCenter = other->getCenter();
-	glm::mat4 otherTransform = other->getOwner()->getTransform();
+	glm::mat4 otherTransform = glm::scale(other->getOwner()->getTransform(), other->getHalfSize());
 
 	for(int a = 0; a < 3; a++) {
 		glm::vec3 l = glm::vec3(oneTransform[a]); // one axis to project on
@@ -90,10 +96,10 @@ bool BoundingBox::isColliding(AABB * one, OBB * other) {
 
 bool BoundingBox::isColliding(OBB * one, OBB * other) {
 	//OBB vs OBB
-	glm::vec3 oneCenter = one->getCenter(); // object's pos = collider center
-	glm::mat4 oneTransform = one->getOwner()->getTransform(); // scaling for halfsize
+	glm::vec3 oneCenter = one->getCenter();
+	glm::mat4 oneTransform = glm::scale(one->getOwner()->getTransform(), one->getHalfSize());
 	glm::vec3 otherCenter = other->getCenter();
-	glm::mat4 otherTransform = other->getOwner()->getTransform();
+	glm::mat4 otherTransform = glm::scale(other->getOwner()->getTransform(), other->getHalfSize());
 
 	for(int a = 0; a < 3; a++) {
 		glm::vec3 l = glm::vec3(oneTransform[a]); // one axis to project on

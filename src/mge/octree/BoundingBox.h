@@ -37,6 +37,8 @@ class BoundingBox {
 		GameObject* getOwner();
 
 	private:
+		static const glm::mat4 _AABB_AXES; //uniform matrix to replace the object transform for AABB
+
 		glm::vec3 _center;
 		glm::vec3 _halfSize;
 		GameObject* _owner;

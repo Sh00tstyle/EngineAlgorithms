@@ -69,46 +69,7 @@ void MGEDemo::_initializeScene() {
 	_world->add(camera);
 	_world->setMainCamera(camera);
 
-	//Testing
-	TestLog::OBJECTS = 200;
-
-	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
-	glm::vec3 pos;
-	glm::vec3 dir;
-	float speed = 10.0f;
-
-	srand(0); //seed for the randomizer
-
-	//create testing objects
-	for(int i = 0; i < TestLog::OBJECTS; i++) {
-		//randomize position based on the octree bounds
-		int xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
-		int yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
-		int zPos = rand() % (int)(octreeHalfSize.z * 2) - octreeHalfSize.z;
-
-		pos = glm::vec3(xPos, yPos, zPos);
-
-		//randomize direction and speed
-		int xDir = rand() % 5 - 2;
-		int yDir = rand() % 5 - 2;
-		int zDir = rand() % 5 - 2;
-
-		//dont allow 0 magnitude directions
-		while(xDir == 0 && yDir == 0 && zDir == 0) {
-			xDir = rand() % 2 - 1;
-			yDir = rand() % 2 - 1;
-			zDir = rand() % 2 - 1;
-		}
-
-		dir = glm::vec3(xDir, yDir, zDir);
-
-		//create test object
-		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
-		newCube->setBoundingBox(new AABB(newCube, glm::vec3(0.5, 0.5, 0.5))); //add collider to make it work
-		newCube->setBehaviour(new MovingBehaviour(dir, speed, octreeHalfSize));
-
-		_world->add(newCube); //also adding to the octree
-	}
+	_initTest();
 }
 
 void MGEDemo::_render() {
@@ -134,6 +95,48 @@ void MGEDemo::_updateHud() {
 
 	_hud->setDebugInfo(debugInfo);
 	_hud->draw();
+}
+
+void MGEDemo::_initTest() {
+	//Testing
+	TestLog::OBJECTS = 500;
+
+	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
+	glm::vec3 objectHalfSize = glm::vec3(0.5, 0.5, 0.5);
+	float speed = 5.0f;
+
+	srand(0); //seed for the randomizer
+
+	//create testing objects
+	for(unsigned i = 0; i < TestLog::OBJECTS; i++) {
+		//randomize position based on the octree bounds
+		float xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
+		float yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
+		float zPos = rand() % (int)(octreeHalfSize.z * 2) - octreeHalfSize.z;
+
+		glm::vec3 objectPos = glm::vec3(xPos, yPos, zPos);
+
+		//randomize direction and speed
+		float xDir = rand() % 5 - 2.5f;
+		float yDir = rand() % 5 - 2.5f;
+		float zDir = rand() % 5 - 2.5f;
+
+		//dont allow 0 magnitude directions
+		while(xDir == 0 && yDir == 0 && zDir == 0) {
+			xDir = rand() % 5 - 2.5f;
+			yDir = rand() % 5 - 2.5f;
+			zDir = rand() % 5 - 2.5f;
+		}
+
+		glm::vec3 movementDirection = glm::vec3(xDir, yDir, zDir);
+
+		//create test object
+		GameObject* newCube = new GameObject("Cube " + std::to_string(i), objectPos);
+		newCube->setBoundingBox(new AABB(newCube, objectHalfSize)); //add collider to make it work
+		newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize));
+
+		_world->add(newCube); //also adding to the octree
+	}
 }
 
 void MGEDemo::_processEvents() {

@@ -9,7 +9,7 @@ class BoundingBox;
 class MovingBehaviour : public AbstractBehaviour
 {
 	public:
-		MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 pOctreeBounds);
+		MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 pOctreeBounds, bool pRotate = false);
 		virtual ~MovingBehaviour();
 
 		virtual void update(float pStep);
@@ -19,12 +19,13 @@ class MovingBehaviour : public AbstractBehaviour
 	private:
 		glm::vec3 _direction;
 		float _speed;
+		bool _rotate;
 
 		glm::vec3 _octreeBounds;
 
 		BoundingBox* _bounds;
 
-		bool _isOutOfBounds();
+		void _resolveOutOfBounds();
 
 };
 

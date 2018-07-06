@@ -5,9 +5,10 @@
 #include "mge/octree/BoundingBox.h"
 #include "mge/core/LineRenderer.hpp"
 
-MovingBehaviour::MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 pOctreeBounds) :AbstractBehaviour() {
+MovingBehaviour::MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 pOctreeBounds, bool pRotate) :AbstractBehaviour() {
 	_direction = pDirection;
 	_speed = pSpeed;
+	_rotate = pRotate;
 
 	_octreeBounds = pOctreeBounds;
 
@@ -23,37 +24,85 @@ void MovingBehaviour::update(float pStep) {
 	//moves in the given diretion with the given speed
 	_owner->translate(_direction * _speed * pStep);
 
-	if(_isOutOfBounds()) {
-		//move teleport object back to a random position inside the bounds
-		int xPos = rand() % (int)(_octreeBounds.x * 2) - _octreeBounds.x;
-		int yPos = rand() % (int)(_octreeBounds.y * 2) - _octreeBounds.y;
-		int zPos = rand() % (int)(_octreeBounds.z * 2) - _octreeBounds.z;
+	//rotate 45°/s over the x and y axes
+	if(_rotate) _owner->rotate(pStep * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
-		_owner->setLocalPosition(glm::vec3(xPos, yPos, zPos));
-
-		//invert direction
-		_direction *= -1.0f;
-	}
+	_resolveOutOfBounds();
 }
 
 void MovingBehaviour::onCollision(BoundingBox * other) {
-	_direction *= -1.0f;
-
 	if(_bounds == nullptr) _bounds = _owner->getBoundingBox();
 
-	//resolve collision cheaply (only x)
-	_owner->translate(glm::vec3(2.0f, 0, 0));
+	//cheaply resolve collisions
+	glm::vec3 center = _bounds->getCenter();
+	glm::vec3 halfSize = _bounds->getHalfSize();
+	glm::vec3 otherCenter = other->getCenter();
+	glm::vec3 otherHalfSize = other->getHalfSize();
+
+	glm::vec3 translationVec = glm::vec3(0, 0, 0);
+
+	if(center.x >= otherCenter.x) {
+		translationVec.x = otherCenter.x + otherHalfSize.x + halfSize.x + 0.5f;
+	} else {
+		translationVec.x = otherCenter.x - otherHalfSize.x - halfSize.x - 0.5f;
+	}
+
+	if(center.y >= otherCenter.y) {
+		translationVec.y = otherCenter.y + otherHalfSize.y + halfSize.y + 0.5f;
+	} else {
+		translationVec.y = otherCenter.y - otherHalfSize.y - halfSize.y - 0.5f;
+	}
+
+	if(center.z >= otherCenter.z) {
+		translationVec.z = otherCenter.z + otherHalfSize.z + halfSize.z + 0.5f;
+	} else {
+		translationVec.z = otherCenter.z - otherHalfSize.z - halfSize.z - 0.5f;
+	}
+
+	_owner->setLocalPosition(otherCenter + translationVec);
+	_direction *= -1;
 }
 
-bool MovingBehaviour::_isOutOfBounds() {
-	//returns true, if the position of the owner is not in the bounds of the octree bounds
-
+void MovingBehaviour::_resolveOutOfBounds() {
 	glm::vec3 pos = _owner->getLocalPosition();
+	glm::vec3 boundNormal = glm::vec3(0, 0, 0);
 
-	return !(pos.x > -_octreeBounds.x &&
-			 pos.x < _octreeBounds.x &&
-			 pos.y > -_octreeBounds.y &&
-			 pos.y < _octreeBounds.y &&
-			 pos.z > -_octreeBounds.z &&
-			 pos.z < _octreeBounds.z);
+	bool outOfBounds = false;
+
+	//detect out of bounds
+	if(pos.x < -_octreeBounds.x) {
+		pos.x = -_octreeBounds.x + 0.5f;
+		boundNormal.x = 1;
+		outOfBounds = true;
+	} else if(pos.x > _octreeBounds.x) {
+		pos.x = _octreeBounds.x - 0.5f;
+		boundNormal.x = -1;
+		outOfBounds = true;
+	}
+
+	if(pos.y < -_octreeBounds.y) {
+		pos.y = -_octreeBounds.y + 0.5f;
+		boundNormal.y = 1;
+		outOfBounds = true;
+	} else if(pos.y > _octreeBounds.y) {
+		pos.y = _octreeBounds.y - 0.5f;
+		boundNormal.y = -1;
+		outOfBounds = true;
+	}
+
+	if(pos.z < -_octreeBounds.z) {
+		pos.z = -_octreeBounds.z + 0.5f;
+		boundNormal.z = 1;
+		outOfBounds = true;
+	} else if (pos.z > _octreeBounds.z) {
+		pos.z = _octreeBounds.z - 0.5f;
+		boundNormal.z = -1;
+		outOfBounds = true;
+	}
+
+	//resolve out of bounds
+	if(outOfBounds) {
+		_direction = glm::reflect(_direction, glm::normalize(boundNormal));
+		_owner->setLocalPosition(pos);
+	}
 }

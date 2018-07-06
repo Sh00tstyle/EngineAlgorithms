@@ -35,6 +35,8 @@ class MGEDemo: public AbstractGame
 
         void _updateHud();
 
+		void _initTest();
+
         MGEDemo(const MGEDemo&);
         MGEDemo& operator=(const MGEDemo&);
 };

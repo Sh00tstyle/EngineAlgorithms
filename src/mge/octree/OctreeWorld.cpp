@@ -18,7 +18,7 @@ OctreeWorld::~OctreeWorld() {
 void OctreeWorld::update(float step) {
 	GameObject::update(step); //base class update
 
-	updateOctree(); //update octree every frame (costly)
+	updateOctree(); //trash and rebuild octree every frame (costly)
 	_octree->checkCollisions();
 }
 
@@ -36,7 +36,7 @@ void OctreeWorld::updateOctree() {
 		GameObject* child = getChildAt(i);
 
 		if(child->getBoundingBox() != nullptr) {
-			if(!_octree->updateNodes(getChildAt(i))) _octree->addObject(child); //add to the root, if it coudnt be added somewhere else
+			_octree->updateNodes(child);
 		}
 	}
 

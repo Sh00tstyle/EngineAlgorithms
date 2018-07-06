@@ -34,25 +34,33 @@ void Octree::addObject(GameObject * newObject) {
 }
 
 //returns true, if the node could store the object otherwise returns false
-bool Octree::updateNodes(GameObject* gameObject) {
-	if(_contains(gameObject->getLocalPosition())) {
+void Octree::updateNodes(GameObject* gameObject, bool checked) {
+	if(checked || _contains(gameObject->getBoundingBox())) {
+		unsigned int fittingChildNodes = 0;
+		bool possibleNodeIndexes[8];
+
 		if(_depth < _TOTAL_DEPTH) {
-			//gameobject is in the current octant, but check for children
+			//gameobject is in the current octant, but check if a child can store it
 			for(int i = 0; i < 8; i++) {
-				if(_childNodes[i]->updateNodes(gameObject)) {
-					//object could be stored, so return true
-					return true;
+				if(_childNodes[i]->_contains(gameObject->getBoundingBox())) {
+					fittingChildNodes++;
+					possibleNodeIndexes[i] = true; //flag with true so we can recheck this node later if needed
+				} else {
+					possibleNodeIndexes[i] = false;
 				}
 			}
 		}
 
-		//child nodes can't hold the object or there are no child nodes left, so store it in this node and return true
-		_objects.push_back(gameObject);
-		return true;
+		if(fittingChildNodes == 1) {
+			//look for the only child node that could store the object and check for further intersection
+			for(int i = 0; i < 8; i++) {
+				if(possibleNodeIndexes[i]) _childNodes[i]->updateNodes(gameObject, true);
+			}
+		} else {
+			//if there is not exactly one child node to store the object, store it in this node
+			addObject(gameObject);
+		}
 	}
-
-	//this octant doesnt store the object, so return false
-	return false;
 }
 
 void Octree::clearObjects() {
@@ -66,23 +74,26 @@ void Octree::clearObjects() {
 }
 
 void Octree::checkCollisions() {
-	//execute collision detection for at least 2 objects in the list
-	if(_objects.size() > 1) {
-		for(unsigned i = 0; i < _objects.size(); i++) {
+	//only called for the root node
+	unsigned int objectCount = _objects.size();
+
+	//execute collision detection for at least 2 objects in the object list
+	if(objectCount > 1) {
+		for(unsigned i = 0; i < objectCount; i++) {
 			BoundingBox* one = _objects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
 
-			//avoid checking collisons twice for
-			for(unsigned j = i; j < _objects.size(); j++) {
+			//avoid checking collisons twice by assigning i to j as starting index
+			for(unsigned j = i; j < objectCount; j++) {
 				if(j == i) continue; //avoid checking against itself
 
 				TestLog::COLLISION_CHECKS++;
-				
+
 				BoundingBox* other = _objects[j]->getBoundingBox();
 
 				//collision detection calculation
 				if(one->collidesWith(other)) {
-					//register collisions in the behaviours
-					_objects[i]->getBehaviour()->onCollision(other);
+					//notify behaviour about the collision
+					_objects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
 					//_objects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
@@ -92,11 +103,11 @@ void Octree::checkCollisions() {
 		}
 	}
 
-	if(_depth >= _TOTAL_DEPTH) return;
+	if(_depth >= _TOTAL_DEPTH) return; //when no children nodes are left
 
 	//check collisions in children
 	for(int i = 0; i < 8; i++) {
-		_childNodes[i]->checkCollisions();
+		_childNodes[i]->_checkCollisions(_objects); //otherwise forward the vector pointer from the parameter to the children
 	}
 }
 
@@ -115,19 +126,80 @@ void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatri
 	}
 }
 
-bool Octree::_contains(glm::vec3 otherPos) {
-	//returns true, if the center of the other object is in the boundaries of the current octant
-	glm::vec3 min = _bounds->getMin();
-	glm::vec3 max = _bounds->getMax();
+bool Octree::_contains(BoundingBox* other) {
+	//AABB vs AABB
+	glm::vec3 oneMin = _bounds->getMin();
+	glm::vec3 oneMax = _bounds->getMax();
+
+	glm::vec3 otherMin = other->getMin();
+	glm::vec3 otherMax = other->getMax();
 
 	TestLog::FIT_TESTS++;
 
-	return (otherPos.x > min.x &&
-			otherPos.x < max.x &&
-			otherPos.y > min.y &&
-			otherPos.y < max.y &&
-			otherPos.z > min.z &&
-			otherPos.z < max.z);
+	return (oneMax.x > otherMin.x &&
+			oneMin.x < otherMax.x &&
+			oneMax.y > otherMin.y &&
+			oneMin.y < otherMax.y &&
+			oneMax.z > otherMin.z &&
+			oneMin.z < otherMax.z);
+}
+
+void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
+	unsigned int objectCount = _objects.size();
+	unsigned int rootObjectCount = parentObjects.size();
+
+	//execute collision detection for at least 2 objects in the object list or for 1 object each in the object list and the root node list
+	if(objectCount > 1 || (objectCount > 0 && rootObjectCount > 0)) {
+		for(unsigned i = 0; i < objectCount; i++) {
+			BoundingBox* one = _objects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
+
+			//avoid checking collisons twice by assigning i to j as starting index
+			for(unsigned j = i; j < objectCount; j++) {
+				if(j == i) continue; //avoid checking against itself
+
+				TestLog::COLLISION_CHECKS++;
+
+				BoundingBox* other = _objects[j]->getBoundingBox();
+
+				//collision detection calculation
+				if(one->collidesWith(other)) {
+					//notify behaviour about the collision
+					_objects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					//_objects[j]->getBehaviour()->onCollision(one);
+
+					std::cout << "collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
+					TestLog::COLLISIONS++;
+				}
+			}
+
+			//check for collisions with the objects in the root node
+			for(unsigned k = 0; k < rootObjectCount; k++) {
+				TestLog::COLLISION_CHECKS++;
+
+				BoundingBox* other = parentObjects[k]->getBoundingBox();
+
+				//collision detection calculation
+				if(one->collidesWith(other)) {
+					//notify behaviour about the collision
+					_objects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					//parentObjects[k]->getBehaviour()->onCollision(one);
+
+					std::cout << "collision between " + _objects[i]->getName() + " and " + parentObjects[k]->getName() << std::endl;
+					TestLog::COLLISIONS++;
+				}
+			}
+		}
+	}
+
+	if(_depth >= _TOTAL_DEPTH) return; //termiante recursion when no children nodes are left
+
+	//merge parentobject list with current object list
+	parentObjects.insert(parentObjects.end(), _objects.begin(), _objects.end()); //append the object list of this node to the parent objects list
+
+	//check collisions in children
+	for(int i = 0; i < 8; i++) {
+		_childNodes[i]->_checkCollisions(parentObjects); //forward the merged vector by value (copy) to all children nodes
+	}
 }
 
 void Octree::_initOctree(int depth) {

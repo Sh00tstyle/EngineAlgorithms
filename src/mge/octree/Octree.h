@@ -14,13 +14,13 @@ class Octree {
 		~Octree();
 
 		void addObject(GameObject* newObject);
-		bool updateNodes(GameObject* gameObject);
+		void updateNodes(GameObject* gameObject, bool checked = false);
 		void clearObjects();
 
 		void checkCollisions();
 		void render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
 
-	private:
+	protected:
 		static int _TOTAL_DEPTH;
 
 		BoundingBox* _bounds;
@@ -34,7 +34,8 @@ class Octree {
 		void _initOctree(int depth);
 		void _destructOctree();
 
-		bool _contains(glm::vec3 otherPos);
+		bool _contains(BoundingBox* other);
+		void _checkCollisions(std::vector<GameObject*> parentObjects); //important to pass by value and not by reference or pointer
 
 };
 
