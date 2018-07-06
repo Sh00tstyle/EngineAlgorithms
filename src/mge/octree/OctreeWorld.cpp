@@ -36,7 +36,7 @@ void OctreeWorld::updateOctree() {
 		GameObject* child = getChildAt(i);
 
 		if(child->getBoundingBox() != nullptr) {
-			_octree->updateNodes(child);
+			if(!_octree->updateNodes(child)) _octree->addObject(child); //nothing in the octree could store the object, so store in the root
 		}
 	}
 

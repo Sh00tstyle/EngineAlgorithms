@@ -34,33 +34,24 @@ void Octree::addObject(GameObject * newObject) {
 }
 
 //returns true, if the node could store the object otherwise returns false
-void Octree::updateNodes(GameObject* gameObject, bool checked) {
-	if(checked || _contains(gameObject->getBoundingBox())) {
-		unsigned int fittingChildNodes = 0;
-		bool possibleNodeIndexes[8];
-
+bool Octree::updateNodes(GameObject* gameObject, bool checked) {
+	if(_contains(gameObject->getBoundingBox())) {
 		if(_depth < _TOTAL_DEPTH) {
-			//gameobject is in the current octant, but check if a child can store it
 			for(int i = 0; i < 8; i++) {
-				if(_childNodes[i]->_contains(gameObject->getBoundingBox())) {
-					fittingChildNodes++;
-					possibleNodeIndexes[i] = true; //flag with true so we can recheck this node later if needed
-				} else {
-					possibleNodeIndexes[i] = false;
-				}
+				if(_childNodes[i]->updateNodes(gameObject)) return true;
 			}
-		}
 
-		if(fittingChildNodes == 1) {
-			//look for the only child node that could store the object and check for further intersection
-			for(int i = 0; i < 8; i++) {
-				if(possibleNodeIndexes[i]) _childNodes[i]->updateNodes(gameObject, true);
-			}
-		} else {
-			//if there is not exactly one child node to store the object, store it in this node
+			//no child contains the object, so store it in this node
 			addObject(gameObject);
+			return true;
+		} else {
+			//no more children left and this node contains the object fully, so add it
+			addObject(gameObject);
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void Octree::clearObjects() {
@@ -127,21 +118,21 @@ void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatri
 }
 
 bool Octree::_contains(BoundingBox* other) {
-	//AABB vs AABB
-	glm::vec3 oneMin = _bounds->getMin();
-	glm::vec3 oneMax = _bounds->getMax();
+	//returns true if the bounds fully contain the other bounds
+	glm::vec3 min = _bounds->getMin();
+	glm::vec3 max = _bounds->getMax();
 
 	glm::vec3 otherMin = other->getMin();
 	glm::vec3 otherMax = other->getMax();
 
 	TestLog::FIT_TESTS++;
 
-	return (oneMax.x > otherMin.x &&
-			oneMin.x < otherMax.x &&
-			oneMax.y > otherMin.y &&
-			oneMin.y < otherMax.y &&
-			oneMax.z > otherMin.z &&
-			oneMin.z < otherMax.z);
+	return max.x >= otherMax.x &&
+		max.y >= otherMax.y &&
+		max.z >= otherMax.z &&
+		min.x <= otherMin.x &&
+		min.y <= otherMin.y &&
+		min.z <= otherMin.z;
 }
 
 void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {

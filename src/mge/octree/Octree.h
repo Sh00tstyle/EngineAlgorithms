@@ -14,7 +14,7 @@ class Octree {
 		~Octree();
 
 		void addObject(GameObject* newObject);
-		void updateNodes(GameObject* gameObject, bool checked = false);
+		bool updateNodes(GameObject* gameObject, bool checked = false);
 		void clearObjects();
 
 		void checkCollisions();
