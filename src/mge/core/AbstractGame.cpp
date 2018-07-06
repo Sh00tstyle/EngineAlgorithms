@@ -79,6 +79,7 @@ void AbstractGame::_initializeRenderer() {
 void AbstractGame::_initializeWorld() {
     //setup the world
 	std::cout << "Initializing world..." << std::endl;
+	TestLog::start();
 	_world = new OctreeWorld();
     std::cout << "World initialized." << std::endl << std::endl;
 }
@@ -125,7 +126,7 @@ void AbstractGame::run()
             timeSinceLastFPSCalculation += renderClock.restart().asSeconds();
             if (timeSinceLastFPSCalculation > 1) {
                 _fps = frameCount/timeSinceLastFPSCalculation;
-				TestLog::fps = _fps;
+				TestLog::FPS = _fps;
                 timeSinceLastFPSCalculation -= 1;
                 frameCount = 0;
             }

@@ -21,7 +21,7 @@ class Octree {
 		void render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
 
 	private:
-		static int TOTAL_DEPTH;
+		static int _TOTAL_DEPTH;
 
 		BoundingBox* _bounds;
 		LineRenderer* _octantRenderer;
@@ -35,7 +35,6 @@ class Octree {
 		void _destructOctree();
 
 		bool _contains(glm::vec3 otherPos);
-		bool _isColliding(BoundingBox* one, BoundingBox* other);
 
 };
 

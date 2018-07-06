@@ -3,18 +3,20 @@
 #include "OctreeWorld.h"
 #include "Octree.h"
 #include "BoundingBox.h"
+#include "AABB.h"
+#include "OBB.h"
 #include "mge\core/LineRenderer.hpp"
 #include "mge/behaviours/MovingBehaviour.hpp"
 #include "mge/util/TestLog.h"
 
-int Octree::TOTAL_DEPTH = 0; //init static depth member
+int Octree::_TOTAL_DEPTH = 0; //init static depth member
 
 Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode) {
 	if(_parentNode == nullptr) {
-		TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
-		TestLog::octreeDepth = TOTAL_DEPTH;
+		_TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
+		TestLog::OCTREE_DEPTH = _TOTAL_DEPTH;
 	} else {
-		_depth = TOTAL_DEPTH - pDepth; //depth of the node itself
+		_depth = _TOTAL_DEPTH - pDepth; //depth of the node itself
 	}
 
 	_octantRenderer = new LineRenderer(_bounds, true);
@@ -34,7 +36,7 @@ void Octree::addObject(GameObject * newObject) {
 //returns true, if the node could store the object otherwise returns false
 bool Octree::updateNodes(GameObject* gameObject) {
 	if(_contains(gameObject->getLocalPosition())) {
-		if(_depth < TOTAL_DEPTH) {
+		if(_depth < _TOTAL_DEPTH) {
 			//gameobject is in the current octant, but check for children
 			for(int i = 0; i < 8; i++) {
 				if(_childNodes[i]->updateNodes(gameObject)) {
@@ -56,7 +58,7 @@ bool Octree::updateNodes(GameObject* gameObject) {
 void Octree::clearObjects() {
 	_objects.clear();
 
-	if(_depth >= TOTAL_DEPTH) return;
+	if(_depth >= _TOTAL_DEPTH) return;
 
 	for(int i = 0; i < 8; i++) {
 		_childNodes[i]->clearObjects();
@@ -67,26 +69,30 @@ void Octree::checkCollisions() {
 	//execute collision detection for at least 2 objects in the list
 	if(_objects.size() > 1) {
 		for(unsigned i = 0; i < _objects.size(); i++) {
+			BoundingBox* one = _objects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
+
 			//avoid checking collisons twice for
 			for(unsigned j = i; j < _objects.size(); j++) {
 				if(j == i) continue; //avoid checking against itself
 
-				TestLog::collisionChecks++;
+				TestLog::COLLISION_CHECKS++;
+				
+				BoundingBox* other = _objects[j]->getBoundingBox();
 
 				//collision detection calculation
-				if(_isColliding(_objects[i]->getBoundingBox(), _objects[j]->getBoundingBox())) {
+				if(one->collidesWith(other)) {
 					//register collisions in the behaviours
-					_objects[i]->getMovingBehaviour()->onCollision(_objects[j]->getBoundingBox());
-					//_objects[j]->getMovingBehaviour()->onCollision(_objects[i]->getBoundingBox());
+					_objects[i]->getBehaviour()->onCollision(other);
+					//_objects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _objects[i]->getName() + " and " + _objects[j]->getName() << std::endl;
-					TestLog::collisions++;
+					TestLog::COLLISIONS++;
 				}
 			}
 		}
 	}
 
-	if(_depth >= TOTAL_DEPTH) return;
+	if(_depth >= _TOTAL_DEPTH) return;
 
 	//check collisions in children
 	for(int i = 0; i < 8; i++) {
@@ -101,7 +107,7 @@ void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatri
 	//render self
 	_octantRenderer->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
 
-	if(_depth >= TOTAL_DEPTH) return;
+	if(_depth >= _TOTAL_DEPTH) return;
 
 	//render children
 	for(int i = 0; i < 8; i++) {
@@ -114,7 +120,7 @@ bool Octree::_contains(glm::vec3 otherPos) {
 	glm::vec3 min = _bounds->getMin();
 	glm::vec3 max = _bounds->getMax();
 
-	TestLog::fitTests++;
+	TestLog::FIT_TESTS++;
 
 	return (otherPos.x > min.x &&
 			otherPos.x < max.x &&
@@ -150,77 +156,11 @@ void Octree::_initOctree(int depth) {
 }
 
 void Octree::_destructOctree() {
-	if(_depth >= TOTAL_DEPTH) return; //dont destruct if there is no depth left
+	if(_depth >= _TOTAL_DEPTH) return; //dont destruct if there is no depth left
 
 	for(unsigned int i = 0; i < 8; i++) {
 		delete _childNodes[i];
 	}
 
 	delete _octantRenderer;
-}
-
-bool Octree::_isColliding(BoundingBox * one, BoundingBox * other) {
-	/**/
-	//AABB vs AABB 
-	glm::vec3 oneMin = one->getMin();
-	glm::vec3 oneMax = one->getMax();
-
-	glm::vec3 otherMin = other->getMin();
-	glm::vec3 otherMax = other->getMax();
-
-	return (oneMax.x > otherMin.x &&
-			oneMin.x < otherMax.x &&
-			oneMax.y > otherMin.y &&
-			oneMin.y < otherMax.y &&
-			oneMax.z > otherMin.z &&
-			oneMin.z < otherMax.z);
-
-	/**
-	//OBB vs OBB
-	glm::vec3 oneCenter = one->getCenter(); // object's pos = collider center
-	glm::mat4 oneTransform = one->getOwner()->getTransform(); // scaling for halfsize
-	glm::vec3 otherCenter = other->getCenter();
-	glm::mat4 otherTransform = other->getOwner()->getTransform();
-
-	for(int a = 0; a < 3; a++) {
-		glm::vec3 l = glm::vec3(oneTransform[a]); // one axis to project on
-		float tl = std::abs(glm::dot(l, otherCenter) - glm::dot(l, oneCenter)); // center distance
-		float ra = std::abs(glm::dot(l, glm::vec3(oneTransform[0]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[1]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[2])));
-		float rb = std::abs(glm::dot(l, glm::vec3(otherTransform[0]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[1]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[2])));
-		float penetration = (ra + rb) - tl;
-		if(penetration <= 0) { // no overlap
-			return false;
-		}
-	}
-
-	for(int b = 0; b < 3; b++) {
-		glm::vec3 l = glm::vec3(otherTransform[b]); // other axis to project on
-		float tl = std::abs(glm::dot(l, otherCenter) - glm::dot(l, oneCenter)); // center distance
-		float ra = std::abs(glm::dot(l, glm::vec3(oneTransform[0]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[1]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[2])));
-		float rb = std::abs(glm::dot(l, glm::vec3(otherTransform[0]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[1]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[2])));
-		float penetration = (ra + rb) - tl;
-		if(penetration <= 0) { // no overlap
-			return false;
-		}
-	}
-
-	for(int a = 0; a < 3; a++) {
-		glm::vec3 aAxis = glm::vec3(oneTransform[a]);
-		for(int b = 0; b < 3; b++) {
-			glm::vec3 bAxis = glm::vec3(otherTransform[b]);
-			if(aAxis != bAxis) {
-				glm::vec3 l = glm::cross(aAxis, bAxis); // has flaw when axis are same, result in (0,0,0), solved by if
-				float tl = std::abs(glm::dot(l, otherCenter) - glm::dot(l, oneCenter)); // center distance
-				float ra = std::abs(glm::dot(l, glm::vec3(oneTransform[0]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[1]))) + std::abs(glm::dot(l, glm::vec3(oneTransform[2])));
-				float rb = std::abs(glm::dot(l, glm::vec3(otherTransform[0]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[1]))) + std::abs(glm::dot(l, glm::vec3(otherTransform[2])));
-				float penetration = (ra + rb) - tl;
-				if(penetration <= 0) { // no overlap
-					return false;
-				}
-			}
-		}
-	}
-
-	return true;
-	/**/
 }

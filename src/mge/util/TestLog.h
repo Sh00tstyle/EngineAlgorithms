@@ -7,17 +7,17 @@
 class TestLog {
 
 	public:
-		static unsigned int fps; //frames per second
-		static unsigned int objects; //amount of test cubes
-		static unsigned int octreeDepth; //intersection depth of the octree
-		static unsigned int octreeUpdates; //amount of updates
-		static unsigned int collisionChecks; //amount of collision checks
-		static unsigned int collisions; //amount of collisions
+		static unsigned int FPS; //frames per second
+		static unsigned int OBJECTS; //amount of test cubes
+		static unsigned int OCTREE_DEPTH; //intersection depth of the octree
+		static unsigned int OCTREE_UPDATES; //amount of updates
+		static unsigned int COLLISION_CHECKS; //amount of collision checks
+		static unsigned int COLLISIONS; //amount of collisions
 
-		static unsigned int fitTests; //amount if tests wether an objects fits in an octant of the octree
-		static unsigned int overlapTests; //???
+		static unsigned int FIT_TESTS; //amount if tests wether an objects fits in an octant of the octree
+		static unsigned int OVERLAP_TESTS; //???
 
-		static std::string resultInfo;
+		static std::string RESULT_INFO;
 
 		static void start(); //initialize/reset the test class
 		static float time(); //returns the time that has elapsed since the start
@@ -25,7 +25,7 @@ class TestLog {
 		static void writeToFile();
 
 	private:
-		static std::chrono::steady_clock::time_point _start;
+		static std::chrono::steady_clock::time_point _START;
 
 };
 

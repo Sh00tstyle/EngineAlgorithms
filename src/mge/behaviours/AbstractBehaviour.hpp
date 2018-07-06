@@ -2,6 +2,7 @@
 #define ABSTRACTBEHAVIOUR_HPP
 
 class GameObject;
+class BoundingBox;
 
 /**
  * An AbstractBehaviour allows you to attach reusable behaviours to GameObjects (steering, rotating, billboarding, etc).
@@ -22,6 +23,8 @@ class AbstractBehaviour
 
         //behaviour should be able to update itself every step and MUST be implemented
 		virtual void update(float pStep) = 0;
+		//notify the behaviour when a collision happened
+		virtual void onCollision(BoundingBox* other);
 
     protected:
 

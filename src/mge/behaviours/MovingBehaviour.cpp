@@ -42,7 +42,7 @@ void MovingBehaviour::onCollision(BoundingBox * other) {
 	if(_bounds == nullptr) _bounds = _owner->getBoundingBox();
 
 	//resolve collision cheaply (only x)
-	_owner->translate(glm::vec3(2.0f, 2.0f, 2.0f));
+	_owner->translate(glm::vec3(2.0f, 0, 0));
 }
 
 bool MovingBehaviour::_isOutOfBounds() {

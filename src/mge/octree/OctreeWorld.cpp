@@ -25,7 +25,7 @@ void OctreeWorld::update(float step) {
 void OctreeWorld::add(GameObject* pChild) {
 	World::add(pChild); //calling the base class function
 
-	updateOctree(); //update octree everytime an object is added (costly)
+	//updateOctree(); //update octree everytime an object is added (costly)
 }
 
 void OctreeWorld::updateOctree() {
@@ -40,7 +40,7 @@ void OctreeWorld::updateOctree() {
 		}
 	}
 
-	TestLog::octreeUpdates++;
+	TestLog::OCTREE_UPDATES++;
 }
 
 void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {

@@ -25,6 +25,8 @@
 #include "mge/behaviours/MovingBehaviour.hpp"
 
 #include "mge/octree/BoundingBox.h"
+#include "mge/octree/AABB.h"
+#include "mge/octree/OBB.h"
 
 #include "mge/util/DebugHud.hpp"
 
@@ -68,8 +70,7 @@ void MGEDemo::_initializeScene() {
 	_world->setMainCamera(camera);
 
 	//Testing
-	TestLog::start();
-	TestLog::objects = 200;
+	TestLog::OBJECTS = 200;
 
 	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
 	glm::vec3 pos;
@@ -79,7 +80,7 @@ void MGEDemo::_initializeScene() {
 	srand(0); //seed for the randomizer
 
 	//create testing objects
-	for(int i = 0; i < TestLog::objects; i++) {
+	for(int i = 0; i < TestLog::OBJECTS; i++) {
 		//randomize position based on the octree bounds
 		int xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
 		int yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
@@ -101,10 +102,10 @@ void MGEDemo::_initializeScene() {
 
 		dir = glm::vec3(xDir, yDir, zDir);
 
+		//create test object
 		GameObject* newCube = new GameObject("Cube " + std::to_string(i), pos);
-		newCube->setBoundingBox(new BoundingBox(newCube, glm::vec3(1, 1, 1))); //add collider to make it work
-		newCube->setMovingBehaviour(new MovingBehaviour(dir, speed, octreeHalfSize)); //just a reference holder basically
-		newCube->setBehaviour(newCube->getMovingBehaviour()); //gets updated
+		newCube->setBoundingBox(new AABB(newCube, glm::vec3(0.5, 0.5, 0.5))); //add collider to make it work
+		newCube->setBehaviour(new MovingBehaviour(dir, speed, octreeHalfSize));
 
 		_world->add(newCube); //also adding to the octree
 	}
@@ -119,17 +120,17 @@ void MGEDemo::_updateHud() {
 	std::string debugInfo = "";
 
 	//draw info from the tester class
-	debugInfo += std::string("FPS: ") + std::to_string(TestLog::fps) + "\n";
-	debugInfo += std::string("Objects: ") + std::to_string(TestLog::objects) + "\n";
-	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::octreeDepth) + "\n";
-	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::octreeUpdates) + "\n";
-	debugInfo += std::string("Collision Checks: ") + std::to_string(TestLog::collisionChecks) + "\n";
-	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::collisions) + "\n";
-	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::fitTests) + "\n";
+	debugInfo += std::string("FPS: ") + std::to_string(TestLog::FPS) + "\n";
+	debugInfo += std::string("Objects: ") + std::to_string(TestLog::OBJECTS) + "\n";
+	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::OCTREE_DEPTH) + "\n";
+	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::OCTREE_UPDATES) + "\n";
+	debugInfo += std::string("Collision Checks: ") + std::to_string(TestLog::COLLISION_CHECKS) + "\n";
+	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::COLLISIONS) + "\n";
+	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::FIT_TESTS) + "\n";
 	//debugInfo += std::string("Overlap Tests: ") + std::to_string(TestLog::overlapTests) + "\n";
 	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n\n";
 
-	TestLog::resultInfo = debugInfo;
+	TestLog::RESULT_INFO = debugInfo;
 
 	_hud->setDebugInfo(debugInfo);
 	_hud->draw();

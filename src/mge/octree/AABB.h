@@ -7,9 +7,13 @@
 class GameObject;
 
 class AABB : public BoundingBox {
-public:
-	AABB(GameObject* pOwner, glm::vec3 pHalfSize);
-	~AABB();
+	public:
+		AABB(GameObject* pOwner, glm::vec3 pHalfSize);
+		~AABB();
+
+		virtual bool collidesWith(BoundingBox* other);
+		virtual bool collidesWith(AABB* other);
+		virtual bool collidesWith(OBB* other);
 };
 
 #endif

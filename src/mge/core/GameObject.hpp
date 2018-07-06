@@ -77,9 +77,6 @@ class GameObject
 
 		LineRenderer* getColliderRenderer();
 
-		void setMovingBehaviour(MovingBehaviour* behaviour);
-		MovingBehaviour* getMovingBehaviour();
-
 		void setStatic(bool status);
 		bool isStatic();
 

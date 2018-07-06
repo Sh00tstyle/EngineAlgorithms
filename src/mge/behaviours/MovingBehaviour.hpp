@@ -14,7 +14,7 @@ class MovingBehaviour : public AbstractBehaviour
 
 		virtual void update(float pStep);
 
-		void onCollision(BoundingBox* other);
+		virtual void onCollision(BoundingBox* other);
 	
 	private:
 		glm::vec3 _direction;

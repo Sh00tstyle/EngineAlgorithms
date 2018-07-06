@@ -25,3 +25,21 @@ Collisions: 473
 Fit Tests: 5432892
 Time: 30.003405
 
+FPS: 58
+Objects: 200
+Octree Depth: 0
+Octree Updates: 1987
+Collision Checks: 618346
+Collisions: 5890
+Fit Tests: 5458345
+Time: 29.999069
+
+FPS: 59
+Objects: 200
+Octree Depth: 3
+Octree Updates: 1796
+Collision Checks: 72758
+Collisions: 86
+Fit Tests: 5183560
+Time: 30.007706
+

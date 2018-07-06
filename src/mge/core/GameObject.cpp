@@ -215,14 +215,6 @@ LineRenderer * GameObject::getColliderRenderer() {
 	return _colliderRenderer;
 }
 
-void GameObject::setMovingBehaviour(MovingBehaviour * behaviour) {
-	_movingBehaviour = behaviour;
-}
-
-MovingBehaviour * GameObject::getMovingBehaviour() {
-	return _movingBehaviour;
-}
-
 void GameObject::setStatic(bool status) {
 	_isStatic = status;
 }
