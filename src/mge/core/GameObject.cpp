@@ -201,6 +201,10 @@ GameObject* GameObject::getChildAt(int pIndex) const {
     return _children[pIndex];
 }
 
+std::vector<GameObject*> GameObject::getChildrenVector() {
+	return _children;
+}
+
 void GameObject::setBoundingBox(BoundingBox * bounds) {
 	_bounds = bounds;
 

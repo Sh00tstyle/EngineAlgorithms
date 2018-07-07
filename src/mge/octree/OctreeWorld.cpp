@@ -5,10 +5,13 @@
 #include "mge/octree/BoundingBox.h"
 #include "mge/util/TestLog.h"
 
-OctreeWorld::OctreeWorld():World() {
-	_octreeHalfSize = glm::vec3(50, 50, 50);
+glm::vec3 OctreeWorld::OCTREE_HALF_SIZE;
 
-	_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), _octreeHalfSize), 3);
+OctreeWorld::OctreeWorld():World() {
+	OCTREE_HALF_SIZE = glm::vec3(50, 50, 50);
+
+	_octree = nullptr;
+	//_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), 2);
 }
 
 OctreeWorld::~OctreeWorld() {
@@ -16,16 +19,11 @@ OctreeWorld::~OctreeWorld() {
 }
 
 void OctreeWorld::update(float step) {
-	GameObject::update(step); //base class update
+	GameObject::update(step); //call update from base class
 
-	updateOctree(); //trash and rebuild octree every frame (costly)
+	//updateOctree(); //version 1: clear and refill octree lists every frame
+	buildOctree(); //version 2: trash and rebuild entire octree every frame
 	_octree->checkCollisions();
-}
-
-void OctreeWorld::add(GameObject* pChild) {
-	World::add(pChild); //calling the base class function
-
-	//updateOctree(); //update octree everytime an object is added (costly)
 }
 
 void OctreeWorld::updateOctree() {
@@ -43,10 +41,20 @@ void OctreeWorld::updateOctree() {
 	TestLog::OCTREE_UPDATES++;
 }
 
-void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
-	_octree->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
+void OctreeWorld::buildOctree() {
+	if(_octree == nullptr) {
+		//build it for the first time (lazy initialization)
+		_octree = new Octree(3);
+		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+	} else {
+		//trash and rebuild
+		_octree->trashTree();
+		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+
+		TestLog::OCTREE_UPDATES++;
+	}
 }
 
-glm::vec3 OctreeWorld::getOctreeHalfSize() {
-	return _octreeHalfSize;
+void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
+	_octree->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
 }

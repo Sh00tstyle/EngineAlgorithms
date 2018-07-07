@@ -57,19 +57,15 @@ void MGEDemo::initialize() {
 
 //build the game _world
 void MGEDemo::_initializeScene() {
-	//Meshes
-	Mesh* cubeMeshF = Mesh::load(config::MGE_MODEL_PATH + "cube_flat.obj");
-
-	//Materials
-	AbstractMaterial* whiteColorMat = new ColorMaterial(glm::vec3(1, 1, 1));
-
-	//Gameobjects
+	//Camera
 	Camera* camera = new Camera("camera", glm::vec3(0, 0, 150));
-	camera->setBehaviour(new KeysBehaviour(20.0f));
+	camera->setBehaviour(new KeysBehaviour(20.0f)); //movement for debug
 	_world->add(camera);
 	_world->setMainCamera(camera);
 
-	_initTest();
+	//Testing
+	_initTest(); //init the testobjects
+	//_world->buildOctree(); //build the octree
 }
 
 void MGEDemo::_render() {
@@ -99,9 +95,9 @@ void MGEDemo::_updateHud() {
 
 void MGEDemo::_initTest() {
 	//Testing
-	TestLog::OBJECTS = 500;
+	TestLog::OBJECTS = 300;
 
-	glm::vec3 octreeHalfSize = _world->getOctreeHalfSize();
+	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
 	glm::vec3 objectHalfSize = glm::vec3(0.5, 0.5, 0.5);
 	float speed = 5.0f;
 

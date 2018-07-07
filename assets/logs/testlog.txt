@@ -1,0 +1,63 @@
+FPS: 0
+Objects: 500
+Octree Depth: 3
+Octree Updates: 1738
+Collision Checks: 22740053
+Collisions: 354
+Fit Tests: 12594967
+Time: 34.481205
+
+FPS: 0
+Objects: 500
+Octree Depth: 2
+Octree Updates: 1790
+Collision Checks: 25389434
+Collisions: 347
+Fit Tests: 8996891
+Time: 31.122206
+
+FPS: 60
+Objects: 300
+Octree Depth: 2
+Octree Updates: 1796
+Collision Checks: 9039469
+Collisions: 150
+Fit Tests: 5384624
+Time: 30.001917
+
+FPS: 59
+Objects: 300
+Octree Depth: 3
+Octree Updates: 0
+Collision Checks: 25328
+Collisions: 1
+Fit Tests: 595280
+Time: 30.005201
+
+FPS: 8
+Objects: 300
+Octree Depth: 3
+Octree Updates: 0
+Collision Checks: 16426234
+Collisions: 144
+Fit Tests: 2496525
+Time: 30.144220
+
+FPS: 59
+Objects: 300
+Octree Depth: 2
+Octree Updates: 1798
+Collision Checks: 9050605
+Collisions: 150
+Fit Tests: 5390945
+Time: 30.003365
+
+FPS: 59
+Objects: 300
+Octree Depth: 2
+Octree Updates: 1797
+Collision Checks: 9045055
+Collisions: 150
+Fit Tests: 4913477
+Time: 30.000635
+

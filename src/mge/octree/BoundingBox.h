@@ -20,6 +20,9 @@ class BoundingBox {
 		static bool isColliding(AABB* one, OBB* other);
 		static bool isColliding(OBB* one, OBB* other);
 
+		//fit test
+		static bool contains(BoundingBox* bounds, BoundingBox* boxToCheck);
+
 		//double dispatiching
 		virtual bool collidesWith(BoundingBox* other);
 		virtual bool collidesWith(AABB* other);
@@ -27,6 +30,7 @@ class BoundingBox {
 
 		//local space
 		glm::vec3 getHalfSize();
+		void setHalfSize(glm::vec3 newHalfSize);
 
 		//world space
 		glm::vec3 getCenter();

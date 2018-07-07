@@ -4,6 +4,7 @@
 #include "mge/core/LineRenderer.hpp"
 #include "AABB.h"
 #include "OBB.h"
+#include "mge/util/TestLog.h"
 
 const glm::mat4 BoundingBox::_AABB_AXES = {
 	1, 0, 0, 0,
@@ -143,6 +144,24 @@ bool BoundingBox::isColliding(OBB * one, OBB * other) {
 	return true;
 }
 
+bool BoundingBox::contains(BoundingBox * bounds, BoundingBox * boxToCheck) {
+	//returns true if the bounds fully contain the other bounds
+	glm::vec3 min = bounds->getMin();
+	glm::vec3 max = bounds->getMax();
+
+	glm::vec3 otherMin = boxToCheck->getMin();
+	glm::vec3 otherMax = boxToCheck->getMax();
+
+	TestLog::FIT_TESTS++;
+
+	return max.x >= otherMax.x &&
+		max.y >= otherMax.y &&
+		max.z >= otherMax.z &&
+		min.x <= otherMin.x &&
+		min.y <= otherMin.y &&
+		min.z <= otherMin.z;
+}
+
 bool BoundingBox::collidesWith(BoundingBox * other) {
 	//exists for the sake of not making the BoundingBox class abstract (bad)
 	return false;
@@ -160,6 +179,10 @@ bool BoundingBox::collidesWith(OBB * other) {
 
 glm::vec3 BoundingBox::getHalfSize() {
 	return _halfSize;
+}
+
+void BoundingBox::setHalfSize(glm::vec3 newHalfSize) {
+	_halfSize = newHalfSize;
 }
 
 glm::vec3 BoundingBox::getCenter() {

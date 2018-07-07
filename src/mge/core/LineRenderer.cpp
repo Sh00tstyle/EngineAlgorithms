@@ -83,7 +83,7 @@ void LineRenderer::_initShader() {
 void LineRenderer::_generateVertices(BoundingBox * bounds, bool isOctree) {
 	// store relevant boundary data
 	glm::vec3 center = glm::vec3(0, 0, 0);
-	if(isOctree) center = bounds->getCenter();
+	if(isOctree) center = bounds->getCenter(); //not dependant on the gameobject pos
 	glm::vec3 halfSize = bounds->getHalfSize();
 
 	//calculate edge points in local space
