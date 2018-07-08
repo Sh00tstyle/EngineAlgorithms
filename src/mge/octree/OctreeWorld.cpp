@@ -10,8 +10,7 @@ glm::vec3 OctreeWorld::OCTREE_HALF_SIZE;
 OctreeWorld::OctreeWorld():World() {
 	OCTREE_HALF_SIZE = glm::vec3(50, 50, 50);
 
-	//_octree = nullptr;
-	_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), 5);
+	_octree = nullptr;
 }
 
 OctreeWorld::~OctreeWorld() {
@@ -22,11 +21,16 @@ void OctreeWorld::update(float step) {
 	GameObject::update(step); //call update from base class
 
 	//updateOctree(); //version 1: clear and refill octree lists every frame
-	buildOctree(); //version 2: trash and rebuild entire octree every frame
+	//buildOctree(); //version 2: trash and rebuild entire octree every frame
+	updateNodes(); //version 3: keep the existing tree and update the nodes
 	_octree->checkCollisions();
 }
 
+
 void OctreeWorld::updateOctree() {
+	//build it for the first time when needed (lazy initialization)
+	if(_octree == nullptr) _octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), TestLog::OCTREE_DEPTH);
+
 	_octree->clearObjects(); //empty the whole octree
 
 	//reassign all objects to the octree nodes
@@ -34,7 +38,7 @@ void OctreeWorld::updateOctree() {
 		GameObject* child = getChildAt(i);
 
 		if(child->getBoundingBox() != nullptr) {
-			if(!_octree->updateNodes(child)) _octree->addObject(child); //nothing in the octree could store the object, so store in the root
+			if(!_octree->fillNodes(child)) _octree->addObject(child); //nothing in the octree could store the object, so store in the root
 		}
 	}
 
@@ -44,12 +48,25 @@ void OctreeWorld::updateOctree() {
 void OctreeWorld::buildOctree() {
 	if(_octree == nullptr) {
 		//build it for the first time when needed (lazy initialization)
-		_octree = new Octree(3);
+		_octree = new Octree();
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
 	} else {
 		//trash and rebuild
 		_octree->trashTree(); //essentially frees up memory from the old tree
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+	}
+
+	TestLog::OCTREE_UPDATES++;
+}
+
+void OctreeWorld::updateNodes() {
+	if(_octree == nullptr) {
+		//build it for the first time when needed (lazy initialization)
+		_octree = new Octree();
+		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+	} else {
+		//update the octree nodes
+		_octree->updateNodes();
 	}
 
 	TestLog::OCTREE_UPDATES++;

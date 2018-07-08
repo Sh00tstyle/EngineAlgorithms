@@ -226,4 +226,3 @@ void GameObject::setStatic(bool status) {
 bool GameObject::isStatic() {
 	return _isStatic;
 }
-

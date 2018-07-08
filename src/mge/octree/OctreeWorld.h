@@ -15,6 +15,7 @@ class OctreeWorld : public World {
 
 		void updateOctree();
 		void buildOctree();
+		void updateNodes();
 		void renderOctree(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
 
 		static glm::vec3 OCTREE_HALF_SIZE;

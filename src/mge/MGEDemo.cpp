@@ -79,11 +79,11 @@ void MGEDemo::_updateHud() {
 	debugInfo += std::string("FPS: ") + std::to_string(TestLog::FPS) + "\n";
 	debugInfo += std::string("Objects: ") + std::to_string(TestLog::OBJECTS) + "\n";
 	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::OCTREE_DEPTH) + "\n";
+	debugInfo += std::string("Octree Node Treshold: ") + std::to_string(TestLog::OCTREE_NODE_TRESHOLD) + "\n";
 	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::OCTREE_UPDATES) + "\n";
 	debugInfo += std::string("Collision Checks: ") + std::to_string(TestLog::COLLISION_CHECKS) + "\n";
 	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::COLLISIONS) + "\n";
 	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::FIT_TESTS) + "\n";
-	//debugInfo += std::string("Overlap Tests: ") + std::to_string(TestLog::overlapTests) + "\n";
 	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n\n";
 
 	TestLog::RESULT_INFO = debugInfo;
@@ -94,7 +94,9 @@ void MGEDemo::_updateHud() {
 
 void MGEDemo::_initTest() {
 	//Testing
-	TestLog::OBJECTS = 100;
+	TestLog::OBJECTS = 300;
+	TestLog::OCTREE_DEPTH = 5;
+	TestLog::OCTREE_NODE_TRESHOLD = 1;
 
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
 	glm::vec3 objectHalfSize = glm::vec3(0.5, 0.5, 0.5);

@@ -11,6 +11,7 @@
 #include "mge/util/TestLog.h"
 
 int Octree::_TOTAL_DEPTH = 0; //init static depth member
+int Octree::_NODE_TRESHOLD = 10; //init static node treshold member
 
 Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode), _objects() {
 	if(_parentNode == nullptr) {
@@ -30,8 +31,8 @@ Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bound
 Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(pParentNode), _octantRenderer(nullptr), _objects() {
 	//init everything with null except for the depth, the buildTree function will take care of filling the tree node with relevant data
 	if(_parentNode == nullptr) {
-		_TOTAL_DEPTH = pDepth;
-		TestLog::OCTREE_DEPTH = _TOTAL_DEPTH;
+		_TOTAL_DEPTH = TestLog::OCTREE_DEPTH;
+		_NODE_TRESHOLD = TestLog::OCTREE_NODE_TRESHOLD;
 		_depth = 0;
 	} else {
 		_depth = pDepth; //depth of the node itself
@@ -41,6 +42,11 @@ Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(
 	for(int i = 0; i < 8; i++) {
 		_childNodes[i] = nullptr;
 	}
+
+	//default starting lifetime
+	_maxLifetime = 8;
+	_lifetime = -1;
+	_hasChildren = false;
 }
 
 Octree::~Octree() {
@@ -52,11 +58,11 @@ void Octree::addObject(GameObject * newObject) {
 }
 
 //returns true if the node could store the object, otherwise returns false
-bool Octree::updateNodes(GameObject* gameObject, bool checked) {
+bool Octree::fillNodes(GameObject* gameObject, bool checked) {
 	if(BoundingBox::contains(_bounds, gameObject->getBoundingBox())) {
 		if(_depth < _TOTAL_DEPTH) {
 			for(int i = 0; i < 8; i++) {
-				if(_childNodes[i]->updateNodes(gameObject)) return true;
+				if(_childNodes[i]->fillNodes(gameObject)) return true;
 			}
 
 			//no child contains the object, so store it in this node
@@ -79,7 +85,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	_octantRenderer = new LineRenderer(bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
 
-	if(_objects.size() <= 1 || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
+	if(_objects.size() <= _NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
 
 	//new octant areas for the child nodes
 	BoundingBox* areas[8];
@@ -112,6 +118,9 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 		}
 
 		if(octantObjects.size() > 0) {
+			//tell the node that we own children
+			if(!_hasChildren) _hasChildren = true;
+
 			//delete added objects from object list
 			for(unsigned j = 0; j < octantObjects.size(); j++) {
 				_objects.erase(std::remove(_objects.begin(), _objects.end(), octantObjects[j]), _objects.end()); //remove the objects from the object list that have been added to an octant
@@ -121,6 +130,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 			_childNodes[i]->buildTree(areas[i], octantObjects); //recursively build the children nodes
 		} else {
 			_childNodes[i] = nullptr;
+			delete areas[i]; //not needed anymore, so free memory
 		}
 	}
 }
@@ -128,6 +138,74 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 void Octree::trashTree() {
 	//remove the entire tree (pls no memory leaks)
 	_destructOctree();
+}
+
+void Octree::updateNodes() {
+	//handle deathtimer for this nodebranch
+	if(_objects.size() == 0) {
+		if(!_hasChildren) {
+			if(_lifetime == -1) { //start lifetime countdown
+				_lifetime = _maxLifetime;
+			} else if(_lifetime > 0) { //update the countdown
+				_lifetime--;
+			}
+		}
+	} else {
+		if(_lifetime != -1) { //reset timer, since this node owns objects now
+			if(_maxLifetime <= 64) { //hardcap of about 1s
+				_maxLifetime *= 2; //give it more time to live since it might be used often
+				_lifetime = -1; //stop the timer
+			}
+		}
+	}
+
+	//recursively update child nodes
+	for(int i = 0; i < 8; i++) {
+		if(_childNodes[i] == nullptr) continue;
+
+		_childNodes[i]->updateNodes();
+	}
+
+	//check for where the objects fit in the tree
+	for(unsigned int i = 0; i < _objects.size(); i++) {
+		Octree* current = this;
+		GameObject* currentObject = _objects[i];
+
+		if(currentObject->getBoundingBox() == nullptr) {
+			_objects.erase(std::remove(_objects.begin(), _objects.end(), currentObject), _objects.end()); //remove the objects from the object list that have been added to an octant
+			continue;
+		}
+
+		//look for the highest up node that can store the object
+		while(!BoundingBox::contains(current->_bounds, currentObject->getBoundingBox())) {
+			if(current->_parentNode != nullptr) current = current->_parentNode;
+			else break; //stop at the root
+		}
+
+		_objects.erase(std::remove(_objects.begin(), _objects.end(), currentObject), _objects.end()); //remove the objects from the object list that have been added to an octant
+		current->_insert(currentObject);
+	}
+
+
+	//update node state
+	int childCount = 0;
+
+	//remove any dead branches from the tree
+	for(int i = 0; i < 8; i++) {
+		if(_childNodes[i] == nullptr) continue;
+
+		if(_childNodes[i]->_lifetime == 0) {
+			//remove and cleanup the inactive node
+			delete _childNodes[i];
+			_childNodes[i] = nullptr;
+		} else {
+			childCount++;
+		}
+	}
+
+	//update the state of the children
+	if(childCount == 0) _hasChildren = false;
+	else _hasChildren = true;
 }
 
 void Octree::clearObjects() {
@@ -283,6 +361,67 @@ void Octree::_initOctree(int depth) {
 	for(int i = 0; i < 8; i++) {
 		_childNodes[i] = new Octree(areas[i], depth - 1, this);
 	}
+}
+
+void Octree::_insert(GameObject * movedObject) {
+	if(_objects.size() < _NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) {
+		//if the subdivision threshold isnt reached yet or if the tree doesnt allow more depth, just add the object to the list
+		_objects.push_back(movedObject);
+		return;
+	}
+
+	//new octant areas for the potential child nodes
+	BoundingBox* areas[8];
+
+	glm::vec3 octantHalfSize = _bounds->getHalfSize() * 0.5f; //half the halfsize to get halfsize for the new octant
+	glm::vec3 center = _bounds->getCenter();
+
+	//define new bounds for new areas, if no child does exist, otherwise just get the bounds from the child node
+	areas[0] = (_childNodes[0] != nullptr) ? _childNodes[0]->_bounds : new BoundingBox(center + glm::vec3(-octantHalfSize.x, -octantHalfSize.y, -octantHalfSize.z), octantHalfSize); //bottom, back, left
+	areas[1] = (_childNodes[1] != nullptr) ? _childNodes[1]->_bounds : new BoundingBox(center + glm::vec3(octantHalfSize.x, -octantHalfSize.y, -octantHalfSize.z), octantHalfSize); //bottom, back, right
+	areas[2] = (_childNodes[2] != nullptr) ? _childNodes[2]->_bounds : new BoundingBox(center + glm::vec3(-octantHalfSize.x, -octantHalfSize.y, octantHalfSize.z), octantHalfSize); //bottom, front, left
+	areas[3] = (_childNodes[3] != nullptr) ? _childNodes[3]->_bounds : new BoundingBox(center + glm::vec3(octantHalfSize.x, -octantHalfSize.y, octantHalfSize.z), octantHalfSize); //bottom, front, right
+	areas[4] = (_childNodes[4] != nullptr) ? _childNodes[4]->_bounds : new BoundingBox(center + glm::vec3(-octantHalfSize.x, octantHalfSize.y, -octantHalfSize.z), octantHalfSize); //top, back, left
+	areas[5] = (_childNodes[5] != nullptr) ? _childNodes[5]->_bounds : new BoundingBox(center + glm::vec3(octantHalfSize.x, octantHalfSize.y, -octantHalfSize.z), octantHalfSize); //top, back, right
+	areas[6] = (_childNodes[6] != nullptr) ? _childNodes[6]->_bounds : new BoundingBox(center + glm::vec3(-octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, left
+	areas[7] = (_childNodes[7] != nullptr) ? _childNodes[7]->_bounds : new BoundingBox(center + glm::vec3(octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, right
+
+	BoundingBox* objectBounds = movedObject->getBoundingBox();
+
+	//check if this boundary includes the object
+	if(BoundingBox::contains(_bounds, objectBounds)) {
+		bool foundNode = false;
+
+		//check which or if an area can contain the object better
+		for(int i = 0; i < 8; i++) {
+			if(foundNode) break;
+
+			if(BoundingBox::contains(areas[i], objectBounds)) {
+				if(_childNodes[i] != nullptr) {
+					_childNodes[i]->_insert(movedObject); //try to insert it in the child
+				} else {
+					//create new node and add object to its list by initializing the node
+					_childNodes[i] = new Octree(_depth - 1, this);
+					_childNodes[i]->_initNode(areas[i], movedObject);
+				}
+
+				foundNode = true;
+			}
+		}
+
+		if(!foundNode) _objects.push_back(movedObject); //object couldnt be stored in any child, so store it here
+	} else {
+		//item is not in the boundary of this node (and most likely we are in the root node, so its fine to store it if there is no other possible location)
+		_objects.push_back(movedObject);
+	}
+}
+
+void Octree::_initNode(BoundingBox * bounds, GameObject * movedObject) {
+	//init node for further use
+	_objects.push_back(movedObject);
+	_bounds = bounds;
+	_octantRenderer = new LineRenderer(bounds, true);
+	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
 }
 
 void Octree::_destructOctree() {

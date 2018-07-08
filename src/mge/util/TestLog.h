@@ -13,9 +13,8 @@ class TestLog {
 		static unsigned int OCTREE_UPDATES; //amount of updates
 		static unsigned int COLLISION_CHECKS; //amount of collision checks
 		static unsigned int COLLISIONS; //amount of collisions
-
+		static unsigned int OCTREE_NODE_TRESHOLD; //the minimum amount of objects a node can store before subdividing
 		static unsigned int FIT_TESTS; //amount if tests wether an objects fits in an octant of the octree
-		static unsigned int OVERLAP_TESTS; //???
 
 		static std::string RESULT_INFO;
 
