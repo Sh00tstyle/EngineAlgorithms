@@ -10,8 +10,8 @@ glm::vec3 OctreeWorld::OCTREE_HALF_SIZE;
 OctreeWorld::OctreeWorld():World() {
 	OCTREE_HALF_SIZE = glm::vec3(50, 50, 50);
 
-	_octree = nullptr;
-	//_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), 2);
+	//_octree = nullptr;
+	_octree = new Octree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), 5);
 }
 
 OctreeWorld::~OctreeWorld() {
@@ -43,16 +43,16 @@ void OctreeWorld::updateOctree() {
 
 void OctreeWorld::buildOctree() {
 	if(_octree == nullptr) {
-		//build it for the first time (lazy initialization)
+		//build it for the first time when needed (lazy initialization)
 		_octree = new Octree(3);
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
 	} else {
 		//trash and rebuild
-		_octree->trashTree();
+		_octree->trashTree(); //essentially frees up memory from the old tree
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
-
-		TestLog::OCTREE_UPDATES++;
 	}
+
+	TestLog::OCTREE_UPDATES++;
 }
 
 void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {

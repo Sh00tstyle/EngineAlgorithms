@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include "OctreeWorld.h"
 #include "Octree.h"
 #include "BoundingBox.h"
@@ -11,13 +12,14 @@
 
 int Octree::_TOTAL_DEPTH = 0; //init static depth member
 
-Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode) {
+Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode), _objects() {
 	if(_parentNode == nullptr) {
-		_TOTAL_DEPTH = pDepth; //store total depth to reconstruct octree later
+		_TOTAL_DEPTH = pDepth;
 		TestLog::OCTREE_DEPTH = _TOTAL_DEPTH;
+		_depth = 0;
+	} else {
+		_depth = _TOTAL_DEPTH - pDepth; //depth of the node itself
 	}
-
-	_depth = _TOTAL_DEPTH - pDepth; //depth of the node itself
 
 	_octantRenderer = new LineRenderer(_bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
@@ -25,7 +27,8 @@ Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bound
 	_initOctree(pDepth); //build octree for the first time, since it is the root node
 }
 
-Octree::Octree(int pDepth, Octree* pParentNode) : _parentNode(pParentNode) {
+Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(pParentNode), _octantRenderer(nullptr), _objects() {
+	//init everything with null except for the depth, the buildTree function will take care of filling the tree node with relevant data
 	if(_parentNode == nullptr) {
 		_TOTAL_DEPTH = pDepth;
 		TestLog::OCTREE_DEPTH = _TOTAL_DEPTH;
@@ -34,8 +37,10 @@ Octree::Octree(int pDepth, Octree* pParentNode) : _parentNode(pParentNode) {
 		_depth = pDepth; //depth of the node itself
 	}
 
-	_octantRenderer = nullptr;
-	_bounds = nullptr;
+	//default init child nodes
+	for(int i = 0; i < 8; i++) {
+		_childNodes[i] = nullptr;
+	}
 }
 
 Octree::~Octree() {
@@ -68,19 +73,13 @@ bool Octree::updateNodes(GameObject* gameObject, bool checked) {
 }
 
 void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
-	int objectCount = (int)objects.size();
-	_bounds = bounds; //adjust boundary dimensions
+	//init this node
 	_objects = objects;
-
-	//create octree renderer for visualization
-	_octantRenderer = new LineRenderer(_bounds, true);
+	_bounds = bounds;
+	_octantRenderer = new LineRenderer(bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
 
-	if(objectCount <= 1 || _depth >= _TOTAL_DEPTH) {
-		return; //terminate recursion, if we reached a leaf node or the max depth
-	}
-
-	_objects.clear(); //empty the objects vector
+	if(_objects.size() <= 1 || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
 
 	//new octant areas for the child nodes
 	BoundingBox* areas[8];
@@ -98,40 +97,36 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	areas[6] = new BoundingBox(center + glm::vec3(-octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, left
 	areas[7] = new BoundingBox(center + glm::vec3(octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, right
 
-	//create array of vectors, one for each respective octant
-	std::vector<GameObject*> octantObjects[8];
+	//building all child nodes
+	for(int i = 0; i < 8; i++) {
+		std::vector<GameObject*> octantObjects; //keep track of the objects to pass to the child node
 
-	//for each object in the list, check if they fit in any of the octants
-	for(int i = 0; i < objectCount; i++) {
-		BoundingBox* objectBounds = objects[i]->getBoundingBox();
-		if(objectBounds == nullptr) continue; //object does not own a collider, so continue with the next object
-		bool foundOctant = false; //keep track if we found an octant to store the object
+		for(unsigned int j = 0; j < _objects.size(); j++) {
+			BoundingBox* objectBounds = _objects[j]->getBoundingBox();
+			if(objectBounds == nullptr) continue; //skip, if the object has no collider
 
-		for(int j = 0; j < 8; j++) {
-			if(BoundingBox::contains(areas[j], objectBounds)) {
-				octantObjects[j].push_back(objects[i]);
-				foundOctant = true;
-				break; //found an octant that can contain this object, so check for the next object
+			//if the child node can hold the object, add it to our list
+			if(BoundingBox::contains(areas[i], objectBounds)) {
+				octantObjects.push_back(_objects[j]);
 			}
 		}
 
-		if(!foundOctant) _objects.push_back(objects[i]); //found no fitting octant, so store it in this node
-	}
+		if(octantObjects.size() > 0) {
+			//delete added objects from object list
+			for(unsigned j = 0; j < octantObjects.size(); j++) {
+				_objects.erase(std::remove(_objects.begin(), _objects.end(), octantObjects[j]), _objects.end()); //remove the objects from the object list that have been added to an octant
+			}
 
-	//create nodes if they contain objects
-	for(int i = 0; i < 8; i++) {
-		if(octantObjects[i].size() > 0) {
-			//create node
 			_childNodes[i] = new Octree(_depth + 1, this);
-			_childNodes[i]->buildTree(areas[i], octantObjects[i]);
+			_childNodes[i]->buildTree(areas[i], octantObjects); //recursively build the children nodes
 		} else {
-			//no child node
 			_childNodes[i] = nullptr;
 		}
 	}
 }
 
 void Octree::trashTree() {
+	//remove the entire tree (pls no memory leaks)
 	_destructOctree();
 }
 
@@ -146,12 +141,12 @@ void Octree::clearObjects() {
 }
 
 void Octree::checkCollisions() {
-	//only called for the root node
+	//only execute for the root node
 	unsigned int objectCount = _objects.size();
 
 	//execute collision detection for at least 2 objects in the object list
 	if(objectCount > 1) {
-		for(unsigned i = 0; i < objectCount; i++) {
+		for(unsigned int i = 0; i < objectCount; i++) {
 			BoundingBox* one = _objects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
 			if(one == nullptr) continue;
 
@@ -204,10 +199,10 @@ void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatri
 
 void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 	unsigned int objectCount = _objects.size();
-	unsigned int rootObjectCount = parentObjects.size();
+	unsigned int parentObjectCount = parentObjects.size();
 
 	//execute collision detection for at least 2 objects in the object list or for 1 object each in the object list and the root node list
-	if(objectCount > 1 || (objectCount > 0 && rootObjectCount > 0)) {
+	if(objectCount > 1 || (objectCount > 0 && parentObjectCount > 0)) {
 		for(unsigned i = 0; i < objectCount; i++) {
 			BoundingBox* one = _objects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
 			if(one == nullptr) continue;
@@ -234,7 +229,7 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 			}
 
 			//check for collisions with the objects in the root node
-			for(unsigned k = 0; k < rootObjectCount; k++) {
+			for(unsigned k = 0; k < parentObjectCount; k++) {
 
 				BoundingBox* other = parentObjects[k]->getBoundingBox();
 				if(other == nullptr) continue;
@@ -293,7 +288,6 @@ void Octree::_initOctree(int depth) {
 void Octree::_destructOctree() {
 	//cleanup
 	delete _octantRenderer;
-
 	delete _bounds;
 
 	if(_depth >= _TOTAL_DEPTH) return;

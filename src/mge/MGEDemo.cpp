@@ -65,7 +65,6 @@ void MGEDemo::_initializeScene() {
 
 	//Testing
 	_initTest(); //init the testobjects
-	//_world->buildOctree(); //build the octree
 }
 
 void MGEDemo::_render() {
@@ -95,7 +94,7 @@ void MGEDemo::_updateHud() {
 
 void MGEDemo::_initTest() {
 	//Testing
-	TestLog::OBJECTS = 300;
+	TestLog::OBJECTS = 100;
 
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
 	glm::vec3 objectHalfSize = glm::vec3(0.5, 0.5, 0.5);

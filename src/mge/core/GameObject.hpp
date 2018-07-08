@@ -71,7 +71,7 @@ class GameObject
         int getChildCount() const;
         GameObject* getChildAt (int pIndex) const;
 
-		std::vector<GameObject*> getChildrenVector(); //return child vector by value
+		std::vector<GameObject*> getChildrenVector(); //return child vector by value (copy)
 
 		//collision detection
 		void setBoundingBox(BoundingBox* bounds);
