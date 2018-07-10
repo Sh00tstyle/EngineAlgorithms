@@ -58,3 +58,43 @@ Collisions: 134
 Fit Tests: 1397220
 Time: 30.019363
 
+FPS: 34
+Objects: 300
+Octree Depth: 5
+Octree Node Treshold: 1
+Octree Updates: 1796
+Collision Checks: 8536630
+Collisions: 134
+Fit Tests: 1395675
+Time: 30.006088
+
+FPS: 11
+Objects: 300
+Octree Depth: 5
+Octree Node Treshold: 1
+Octree Updates: 1788
+Collision Checks: 8499629
+Collisions: 134
+Fit Tests: 1390297
+Time: 30.075710
+
+FPS: 57
+Objects: 300
+Octree Depth: 5
+Octree Node Treshold: 1
+Octree Updates: 1798
+Collision Checks: 2495771
+Collisions: 35
+Fit Tests: 711920
+Time: 30.030054
+
+FPS: 60
+Objects: 300
+Octree Depth: 5
+Octree Node Treshold: 1
+Octree Updates: 1798
+Collision Checks: 2495771
+Collisions: 35
+Fit Tests: 711920
+Time: 30.009705
+

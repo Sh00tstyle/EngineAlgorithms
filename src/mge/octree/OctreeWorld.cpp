@@ -64,6 +64,7 @@ void OctreeWorld::updateNodes() {
 		//build it for the first time when needed (lazy initialization)
 		_octree = new Octree();
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+		_octree->filterStatics();
 	} else {
 		//update the octree nodes
 		_octree->updateNodes();

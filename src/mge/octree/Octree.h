@@ -21,15 +21,20 @@ class Octree {
 		void clearObjects();
 
 		//verison 2: the entire tree is trashed and rebuilt every frame
-		void buildTree(BoundingBox* bounds, std::vector<GameObject*> objects);
+		void buildTree(BoundingBox* bounds, std::vector<GameObject*> dynamicObjects);
 		void trashTree();
 
 		//version 3: keep the tree and update the nodes
 		void updateNodes();
 
-		//collision & rendering
+		//collision
 		void checkCollisions();
+
+		//rendering
 		void render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
+
+		//dynamic and static objects
+		void filterStatics();
 
 	protected:
 		static int _TOTAL_DEPTH; //remembering the total depth of the entire octree
@@ -39,7 +44,8 @@ class Octree {
 		BoundingBox* _bounds; //define the enclosing region 
 		Octree* _childNodes[8]; //eight possible nodes
 		Octree* _parentNode; //reference to the parent node, is nullptr if it is the root note
-		std::vector<GameObject*> _objects; //list of references to the objects that are stored in this node
+		std::vector<GameObject*> _dynamicObjects; //list of references to the objects that are stored in this node
+		std::vector<GameObject*> _staticObjects;
 		int _depth; //keeping track of the depth of this node
 
 		//octree updates
@@ -55,7 +61,6 @@ class Octree {
 
 		//version 3: inserting the moved objects back into the octree
 		void _insert(GameObject* movedObject);
-
 		void _initNode(BoundingBox* bounds, GameObject* item);
 
 		//collision test
