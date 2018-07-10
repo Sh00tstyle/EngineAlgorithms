@@ -50,10 +50,12 @@ void OctreeWorld::buildOctree() {
 		//build it for the first time when needed (lazy initialization)
 		_octree = new Octree();
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+		//_octree->filterStatics();
 	} else {
 		//trash and rebuild
 		_octree->trashTree(); //essentially frees up memory from the old tree
 		_octree->buildTree(new BoundingBox(glm::vec3(0, 0, 0), OCTREE_HALF_SIZE), getChildrenVector());
+		//_octree->filterStatics();
 	}
 
 	TestLog::OCTREE_UPDATES++;

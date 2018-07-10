@@ -106,13 +106,14 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	//building all child nodes
 	for(int i = 0; i < 8; i++) {
 		std::vector<GameObject*> octantObjects; //keep track of the objects to pass to the child node
+		BoundingBox* areaBounds = areas[i];
 
 		for(unsigned int j = 0; j < _dynamicObjects.size(); j++) {
 			BoundingBox* objectBounds = _dynamicObjects[j]->getBoundingBox();
 			if(objectBounds == nullptr) continue; //skip, if the object has no collider
 
 			//if the child node can hold the object, add it to our list
-			if(BoundingBox::contains(areas[i], objectBounds)) {
+			if(BoundingBox::contains(areaBounds, objectBounds)) {
 				octantObjects.push_back(_dynamicObjects[j]);
 			}
 		}
@@ -127,7 +128,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 			}
 
 			_childNodes[i] = new Octree(_depth + 1, this);
-			_childNodes[i]->buildTree(areas[i], octantObjects); //recursively build the children nodes
+			_childNodes[i]->buildTree(areaBounds, octantObjects); //recursively build the children nodes
 		} else {
 			_childNodes[i] = nullptr;
 			delete areas[i]; //not needed anymore, so free memory
@@ -172,7 +173,7 @@ void Octree::updateNodes() {
 		GameObject* currentObject = _dynamicObjects[i];
 
 		if(currentObject->getBoundingBox() == nullptr) {
-			_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), currentObject), _dynamicObjects.end()); //remove the objects from the object list that have been added to an octant
+			_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), currentObject), _dynamicObjects.end()); //dangerous to remove while iterating (differnt solution: use a std::map)
 			continue;
 		}
 
@@ -182,7 +183,7 @@ void Octree::updateNodes() {
 			else break; //stop at the root
 		}
 
-		_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), currentObject), _dynamicObjects.end()); //remove the objects from the object list that have been added to an octant
+		_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), currentObject), _dynamicObjects.end()); //dangerous to remove while iterating (differnt solution: use a std::map)
 		current->_insert(currentObject);
 	}
 
@@ -220,18 +221,23 @@ void Octree::clearObjects() {
 
 void Octree::checkCollisions() {
 	//only execute for the root node
+	unsigned int dynamicsCount = _dynamicObjects.size();
+	unsigned int staticsCount = _staticObjects.size();
 
 	//execute collision detection for at least 2 objects in the object list
-	if((_dynamicObjects.size() + _staticObjects.size()) > 1) {
-		for(unsigned int i = 0; i < _dynamicObjects.size(); i++) {
+	if((dynamicsCount + staticsCount) > 1) {
+		for(unsigned int i = 0; i < dynamicsCount; i++) {
 			BoundingBox* one = _dynamicObjects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
+			BoundingBox* other = nullptr;
+			AbstractBehaviour* oneBehaviour = _dynamicObjects[i]->getBehaviour();
+
 			if(one == nullptr) continue;
 
 			//check against other dynamic objects
-			for(unsigned int j = i; j < _dynamicObjects.size(); j++) {
+			for(unsigned int j = i; j < dynamicsCount; j++) {
 				if(j == i) continue; //avoid checking against itself
 
-				BoundingBox* other = _dynamicObjects[j]->getBoundingBox();
+				other = _dynamicObjects[j]->getBoundingBox();
 				if(other == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
@@ -239,7 +245,7 @@ void Octree::checkCollisions() {
 				//collision detection calculation
 				if(one->collidesWith(other)) {
 					//notify behaviour about the collision
-					_dynamicObjects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					oneBehaviour->onCollision(other); //only resolve one cube with this setup
 					//_dynamicObjects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _dynamicObjects[j]->getName() << std::endl;
@@ -248,8 +254,8 @@ void Octree::checkCollisions() {
 			}
 
 			//check against static objects
-			for(unsigned int j = 0; j < _staticObjects.size(); j++) {
-				BoundingBox* other = _staticObjects[j]->getBoundingBox();
+			for(unsigned int j = 0; j < staticsCount; j++) {
+				other = _staticObjects[j]->getBoundingBox();
 				if(other == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
@@ -257,7 +263,7 @@ void Octree::checkCollisions() {
 				//collision detection calculation
 				if(one->collidesWith(other)) {
 					//notify behaviour about the collision
-					_dynamicObjects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					oneBehaviour->onCollision(other); //only resolve one cube with this setup
 					//_staticObjects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _staticObjects[j]->getName() << std::endl;
@@ -293,17 +299,24 @@ void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatri
 }
 
 void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
+	unsigned int dynamicsCount = _dynamicObjects.size();
+	unsigned int staticsCount = _staticObjects.size();
+	unsigned int parentObjectsCount = parentObjects.size();
+
 	//execute collision detection for at least 2 objects in the object list or for 1 object each in the object list and the root node list
-	if((_dynamicObjects.size() + _staticObjects.size() + parentObjects.size()) > 1) {
-		for(unsigned i = 0; i < _dynamicObjects.size(); i++) {
+	if((dynamicsCount + staticsCount + parentObjectsCount) > 1) {
+		for(unsigned i = 0; i < dynamicsCount; i++) {
 			BoundingBox* one = _dynamicObjects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
+			BoundingBox* other = nullptr;
+			AbstractBehaviour* oneBehaviour = _dynamicObjects[i]->getBehaviour();
+
 			if(one == nullptr) continue;
 
 			//check against other dynamic objects
-			for(unsigned j = i; j < _dynamicObjects.size(); j++) {
+			for(unsigned j = i; j < dynamicsCount; j++) {
 				if(j == i) continue; //avoid checking against itself
 
-				BoundingBox* other = _dynamicObjects[j]->getBoundingBox();
+				other = _dynamicObjects[j]->getBoundingBox();
 				if(other == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
@@ -311,7 +324,7 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 				//collision detection calculation
 				if(one->collidesWith(other)) {
 					//notify behaviour about the collision
-					_dynamicObjects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					oneBehaviour->onCollision(other); //only resolve one cube with this setup
 					//_dynamicObjects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _dynamicObjects[j]->getName() << std::endl;
@@ -320,9 +333,8 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 			}
 
 			//check against objects in the root node
-			for(unsigned j = 0; j < parentObjects.size(); j++) {
-
-				BoundingBox* other = parentObjects[j]->getBoundingBox();
+			for(unsigned j = 0; j < parentObjectsCount; j++) {
+				other = parentObjects[j]->getBoundingBox();
 				if(other == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
@@ -330,7 +342,7 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 				//collision detection calculation
 				if(one->collidesWith(other)) {
 					//notify behaviour about the collision
-					_dynamicObjects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					oneBehaviour->onCollision(other); //only resolve one cube with this setup
 					//parentObjects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + parentObjects[j]->getName() << std::endl;
@@ -339,8 +351,8 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 			}
 
 			//check against static objects
-			for(unsigned int j = 0; j < _staticObjects.size(); j++) {
-				BoundingBox* other = _staticObjects[j]->getBoundingBox();
+			for(unsigned int j = 0; j < staticsCount; j++) {
+				other = _staticObjects[j]->getBoundingBox();
 				if(other == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
@@ -348,7 +360,7 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 				//collision detection calculation
 				if(one->collidesWith(other)) {
 					//notify behaviour about the collision
-					_dynamicObjects[i]->getBehaviour()->onCollision(other); //only resolve one cube with this setup
+					oneBehaviour->onCollision(other); //only resolve one cube with this setup
 					//_staticObjects[j]->getBehaviour()->onCollision(one);
 
 					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _staticObjects[j]->getName() << std::endl;
@@ -438,6 +450,9 @@ void Octree::_insert(GameObject * movedObject) {
 				}
 
 				foundNode = true;
+			} else {
+				//area is not needed anymore and belong to no child node, so clean up the memory
+				if(_childNodes[i] == nullptr) delete areas[i];
 			}
 		}
 
@@ -461,10 +476,11 @@ void Octree::filterStatics() {
 	for(unsigned int i = 0; i < _dynamicObjects.size(); i++) {
 		if(_dynamicObjects[i]->isStatic()) {
 			_staticObjects.push_back(_dynamicObjects[i]);
+			//_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), _staticObjects[i]), _dynamicObjects.end()); //optimization but removing while iterating is dangerous
 		}
 	}
 
-	//remove objects that are in both lists from the dynamic list to avoid duplicates
+	//rather remove objects safely from the dynamics list after filling the statics list
 	for(unsigned int i = 0; i < _staticObjects.size(); i++) {
 		_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), _staticObjects[i]), _dynamicObjects.end());
 	}

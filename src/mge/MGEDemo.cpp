@@ -95,7 +95,7 @@ void MGEDemo::_updateHud() {
 void MGEDemo::_initTest() {
 	//Testing
 	TestLog::OBJECTS = 300;
-	TestLog::OCTREE_DEPTH = 5;
+	TestLog::OCTREE_DEPTH = 4;
 	TestLog::OCTREE_NODE_TRESHOLD = 1;
 
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
