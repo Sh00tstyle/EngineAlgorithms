@@ -13,14 +13,14 @@ const glm::mat4 BoundingBox::_AABB_AXES = {
 	0, 0, 0, 1
 };
 
-BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize) {
+BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize, unsigned int pType): _type(pType) {
 	//stationary bounds for the octree
 	_owner = nullptr;
 	_center = pCenter;
 	_halfSize = pHalfSize;
 }
 
-BoundingBox::BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize) {
+BoundingBox::BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize, unsigned int pType) : _type(pType) {
 	//dynamic bounds for object that might move (but can be set to static)
 	_owner = pOwner;
 	_center = _owner->getLocalPosition();
@@ -163,17 +163,22 @@ bool BoundingBox::contains(BoundingBox * bounds, BoundingBox * boxToCheck) {
 }
 
 bool BoundingBox::collidesWith(BoundingBox * other) {
-	//exists for the sake of not making the BoundingBox class abstract (bad)
+	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
 bool BoundingBox::collidesWith(AABB * other) {
-	//exists for the sake of not making the BoundingBox class abstract (bad)
+	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
 bool BoundingBox::collidesWith(OBB * other) {
-	//exists for the sake of not making the BoundingBox class abstract (bad)
+	//exists for the sake of not making the BoundingBox class abstract
+	return false;
+}
+
+bool BoundingBox::collidesWithSwitch(BoundingBox * other) {
+	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
@@ -202,4 +207,8 @@ glm::vec3 BoundingBox::getMax() {
 
 GameObject* BoundingBox::getOwner() {
 	return _owner;
+}
+
+unsigned int BoundingBox::getType() {
+	return _type;
 }

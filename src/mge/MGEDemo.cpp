@@ -132,7 +132,7 @@ void MGEDemo::_initTest() {
 		newCube->setBoundingBox(new AABB(newCube, objectHalfSize)); //add collider to make it work
 		newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize));
 
-		if(i > TestLog::OBJECTS / 2) newCube->setStatic(true); //make 50% static
+		//if(i < TestLog::OBJECTS * 0.8f) newCube->setStatic(true); //make 80% static
 
 		_world->add(newCube); //also adding to the octree
 	}

@@ -15,6 +15,8 @@ class OBB : public BoundingBox {
 		virtual bool collidesWith(BoundingBox* other);
 		virtual bool collidesWith(AABB* other);
 		virtual bool collidesWith(OBB* other);
+
+		virtual bool collidesWithSwitch(BoundingBox* other);
 };
 
 #endif

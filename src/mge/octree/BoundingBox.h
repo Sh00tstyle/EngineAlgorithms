@@ -11,8 +11,8 @@ class OBB;
 class BoundingBox {
 
 	public:
-		BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize); //for octree bounds
-		BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize); //for gameobject colliders
+		BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize, unsigned int pType = 0); //for octree bounds
+		BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize, unsigned int pType = 0); //for gameobject colliders
 		~BoundingBox();
 
 		//collision detection calculations
@@ -23,10 +23,13 @@ class BoundingBox {
 		//fit test
 		static bool contains(BoundingBox* bounds, BoundingBox* boxToCheck);
 
-		//double dispatiching
+		//double dispatching
 		virtual bool collidesWith(BoundingBox* other);
 		virtual bool collidesWith(AABB* other);
 		virtual bool collidesWith(OBB* other);
+
+		//switch collision
+		virtual bool collidesWithSwitch(BoundingBox* other);
 
 		//local space
 		glm::vec3 getHalfSize();
@@ -40,9 +43,13 @@ class BoundingBox {
 		//access to the gameobject (maybe not needed)
 		GameObject* getOwner();
 
+		//access to the collider type
+		unsigned int getType();
+
 	private:
 		static const glm::mat4 _AABB_AXES; //uniform matrix to replace the object transform for AABB
 
+		unsigned int _type; //0 = BoundingBox, 1 = AABB, 2 = OBB
 		glm::vec3 _center;
 		glm::vec3 _halfSize;
 		GameObject* _owner;

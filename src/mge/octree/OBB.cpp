@@ -1,6 +1,6 @@
 #include "OBB.h"
 
-OBB::OBB(GameObject* pOwner, glm::vec3 pHalfSize):BoundingBox(pOwner, pHalfSize) {
+OBB::OBB(GameObject* pOwner, glm::vec3 pHalfSize):BoundingBox(pOwner, pHalfSize, 2) {
 }
 
 OBB::~OBB() {
@@ -16,4 +16,16 @@ bool OBB::collidesWith(AABB * other) {
 
 bool OBB::collidesWith(OBB * other) {
 	return isColliding(this, other); //OBB vs OBB
+}
+
+bool OBB::collidesWithSwitch(BoundingBox * other) {
+	switch(other->getType()) {
+		case 1:
+			return isColliding((AABB*)other, this); //AABB vs OBB
+			break;
+
+		case 2:
+			return isColliding(this, (OBB*)other); //OBB vs OBB
+			break;
+	}
 }
