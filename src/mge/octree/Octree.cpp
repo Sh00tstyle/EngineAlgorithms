@@ -440,19 +440,21 @@ void Octree::_insert(GameObject * movedObject) {
 		for(int i = 0; i < 8; i++) {
 			if(foundNode) break;
 
-			if(BoundingBox::contains(areas[i], objectBounds)) {
+			BoundingBox* area = areas[i];
+
+			if(BoundingBox::contains(area, objectBounds)) {
 				if(_childNodes[i] != nullptr) {
 					_childNodes[i]->_insert(movedObject); //try to insert it in the child
 				} else {
 					//create new node and add object to its list by initializing the node
 					_childNodes[i] = new Octree(_depth - 1, this);
-					_childNodes[i]->_initNode(areas[i], movedObject);
+					_childNodes[i]->_initNode(area, movedObject);
 				}
 
 				foundNode = true;
 			} else {
 				//area is not needed anymore and belong to no child node, so clean up the memory
-				if(_childNodes[i] == nullptr) delete areas[i];
+				if(_childNodes[i] == nullptr) delete area;
 			}
 		}
 
