@@ -59,7 +59,7 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 		int counter = 0;
 
 		while(std::getline(fileRead, line)) {
-			if(counter > 0) { //the header exists if there are at least two lines in the log
+			if(counter > 1) { //the header exists if there are at least two lines in the log
 				generateHeader = false;
 
 				std::cout << "Not generating header file, it already exists" << std::endl;
@@ -81,6 +81,7 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 		std::cout << "Writing log file '" + filename + "' to " + filepath << std::endl;
 
 		if(generateHeader) {
+			fileWrite << "sep=,\n"; //tells excel to seperate by comma
 			fileWrite << "FPS,";
 			fileWrite << "Total Objects,";
 			fileWrite << "Static Objects,";
