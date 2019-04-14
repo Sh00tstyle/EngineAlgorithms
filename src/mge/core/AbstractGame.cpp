@@ -6,6 +6,8 @@
 
 #include "mge/util/TestLog.h"
 
+#include "mge/config.hpp"
+
 AbstractGame::AbstractGame():_window(NULL),_renderer(NULL),_world(NULL), _fps(0)
 {
     //ctor
@@ -100,8 +102,8 @@ void AbstractGame::run()
 
 	while (_window->isOpen()) {
 		//execute test for max 30s
-		if(TestLog::time() >= 30.0f) {
-			TestLog::writeResultsToFile();
+		if(TestLog::time() >= 1.0f) {
+			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, "log_rename.txt");
 
 			_window->close();
 			return;

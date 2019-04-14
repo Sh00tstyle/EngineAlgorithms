@@ -82,6 +82,8 @@ void MGEDemo::_updateHud() {
 	debugInfo += std::string("Total Objects: ") + std::to_string(TestLog::TOTAL_OBJECTS) + "\n";
 	debugInfo += std::string("Static Objects: ") + std::to_string(TestLog::STATIC_OBJECTS) + "\n";
 	debugInfo += std::string("Dynamic Objects: ") + std::to_string(TestLog::DYNAMIC_OBJECTS) + "\n";
+	debugInfo += std::string("OBB Collider: ") + std::to_string(TestLog::OBB_COLLIDER) + "\n";
+	debugInfo += std::string("AABB Collider: ") + std::to_string(TestLog::AABB_COLLIDER) + "\n";
 	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::OCTREE_DEPTH) + "\n";
 	debugInfo += std::string("Octree Node Treshold: ") + std::to_string(TestLog::OCTREE_NODE_TRESHOLD) + "\n";
 	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::OCTREE_UPDATES) + "\n";
@@ -97,8 +99,6 @@ void MGEDemo::_updateHud() {
 		debugInfo += std::string("false\n\n");
 	}
 
-	TestLog::RESULT_INFO = debugInfo;
-
 	_hud->setDebugInfo(debugInfo);
 	_hud->draw();
 }
@@ -106,16 +106,22 @@ void MGEDemo::_updateHud() {
 void MGEDemo::_initTest() {
 	//Testing
 	if(!TestLog::readConfigFile(config::OCTREE_CFG_PATH, "config.txt")) {
+		float staticFactor = 0.0f;
+		float obbFactor = 0.2f;
+
 		TestLog::TOTAL_OBJECTS = 50;
-		TestLog::STATIC_OBJECTS = TestLog::TOTAL_OBJECTS * 0.0f;
+		TestLog::STATIC_OBJECTS = TestLog::TOTAL_OBJECTS * staticFactor;
+		TestLog::DYNAMIC_OBJECTS = TestLog::TOTAL_OBJECTS - TestLog::STATIC_OBJECTS;
+
+		TestLog::OBB_COLLIDER = TestLog::DYNAMIC_OBJECTS * obbFactor;
+		TestLog::AABB_COLLIDER = TestLog::DYNAMIC_OBJECTS - TestLog::OBB_COLLIDER;
+
 		TestLog::OCTREE_DEPTH = 4;
 		TestLog::OCTREE_NODE_TRESHOLD = 5;
 		TestLog::USE_DOUBLE_DISPATCHING = true;
 
 		TestLog::writeConfigFile(config::OCTREE_CFG_PATH, "config.txt");
 	}
-
-	TestLog::DYNAMIC_OBJECTS = TestLog::TOTAL_OBJECTS - TestLog::STATIC_OBJECTS;
 
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
 	glm::vec3 objectHalfSize = glm::vec3(0.5f);
@@ -124,6 +130,8 @@ void MGEDemo::_initTest() {
 	srand(0); //seed for the randomizer
 
 	//create testing objects
+	int obbCounter = 0;
+
 	for(unsigned i = 0; i < TestLog::TOTAL_OBJECTS; i++) {
 		//randomize position based on the octree bounds
 		float xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
@@ -133,9 +141,9 @@ void MGEDemo::_initTest() {
 		glm::vec3 objectPos = glm::vec3(xPos, yPos, zPos);
 
 		//randomize direction and speed
-		float xDir = rand() % 5 - 2.5f;
-		float yDir = rand() % 5 - 2.5f;
-		float zDir = rand() % 5 - 2.5f;
+		float xDir = 0;
+		float yDir = 0;
+		float zDir = 0;
 
 		//dont allow 0 magnitude directions
 		while(xDir == 0 && yDir == 0 && zDir == 0) {
@@ -148,16 +156,29 @@ void MGEDemo::_initTest() {
 
 		//create test object
 		GameObject* newCube = new GameObject("Cube " + std::to_string(i), objectPos);
-		newCube->setBoundingBox(new AABB(newCube, objectHalfSize)); //add collider to make it work
 		newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize));
 
-		//newCube->setBoundingBox(new OBB(newCube, objectHalfSize));
-		//newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize, true));
+		//add collider types
+		if(i < TestLog::STATIC_OBJECTS) { //static objects
+			//all statics are AABB for the tests
+			newCube->setBoundingBox(new AABB(newCube, objectHalfSize));
 
-		if(i < TestLog::STATIC_OBJECTS) newCube->setStatic(true);
+			newCube->setStatic(true);
+		} else if(obbCounter < TestLog::OBB_COLLIDER) { //dynamic objects with rotation
+			//OBB collider
+			newCube->setBoundingBox(new OBB(newCube, objectHalfSize));
+
+			obbCounter++;
+		} else { //dynamic objects without rotations
+			//AABB collider
+			newCube->setBoundingBox(new AABB(newCube, objectHalfSize));
+		}
 
 		_world->add(newCube); //also adding to the octree
 	}
+
+	TestLog::OBB_COLLIDER = obbCounter;
+	TestLog::AABB_COLLIDER = TestLog::DYNAMIC_OBJECTS - TestLog::OBB_COLLIDER;
 }
 
 void MGEDemo::_processEvents() {
