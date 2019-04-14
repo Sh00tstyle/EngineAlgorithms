@@ -102,8 +102,8 @@ void AbstractGame::run()
 
 	while (_window->isOpen()) {
 		//execute test for max 30s
-		if(TestLog::time() >= 1.0f) {
-			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, "log_rename.txt");
+		if(TestLog::time() >= 30.0f) {
+			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, "log_rename.csv");
 
 			_window->close();
 			return;
