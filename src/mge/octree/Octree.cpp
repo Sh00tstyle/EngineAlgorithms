@@ -23,7 +23,7 @@ Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bound
 	}
 
 	_octantRenderer = new LineRenderer(_bounds, true);
-	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
+	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); //blue
 
 	_initOctree(pDepth); //build octree for the first time, since it is the root node
 }
@@ -39,7 +39,7 @@ Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(
 	}
 
 	//default init child nodes
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		_childNodes[i] = nullptr;
 	}
 
@@ -61,7 +61,7 @@ void Octree::addObject(GameObject * newObject) {
 bool Octree::fillNodes(GameObject* gameObject, bool checked) {
 	if(BoundingBox::contains(_bounds, gameObject->getBoundingBox())) {
 		if(_depth < _TOTAL_DEPTH) {
-			for(int i = 0; i < 8; i++) {
+			for(int i = 0; i < 8; ++i) {
 				if(_childNodes[i]->fillNodes(gameObject)) return true;
 			}
 
@@ -83,7 +83,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	_dynamicObjects = objects; //at this point the static and dynamic objects are not split/filtered out yet
 	_bounds = bounds;
 	_octantRenderer = new LineRenderer(bounds, true);
-	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
+	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); //blue
 
 	if(_dynamicObjects.size() <= _NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
 
@@ -104,11 +104,11 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	areas[7] = new BoundingBox(center + glm::vec3(octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, right
 
 	//building all child nodes
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		std::vector<GameObject*> octantObjects; //keep track of the objects to pass to the child node
 		BoundingBox* areaBounds = areas[i];
 
-		for(unsigned int j = 0; j < _dynamicObjects.size(); j++) {
+		for(unsigned int j = 0; j < _dynamicObjects.size(); ++j) {
 			BoundingBox* objectBounds = _dynamicObjects[j]->getBoundingBox();
 			if(objectBounds == nullptr) continue; //skip, if the object has no collider
 
@@ -123,7 +123,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 			if(!_hasChildren) _hasChildren = true;
 
 			//delete added objects from object list
-			for(unsigned j = 0; j < octantObjects.size(); j++) {
+			for(unsigned j = 0; j < octantObjects.size(); ++j) {
 				_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), octantObjects[j]), _dynamicObjects.end()); //remove the objects from the object list that have been added to an octant
 			}
 
@@ -161,14 +161,14 @@ void Octree::updateNodes() {
 	}
 
 	//recursively update child nodes
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		if(_childNodes[i] == nullptr) continue;
 
 		_childNodes[i]->updateNodes();
 	}
 
 	//check for where the objects fit in the tree (NOTE: Only doing this for dynamic objects, since statics never move and always remain in their branch)
-	for(unsigned int i = 0; i < _dynamicObjects.size(); i++) {
+	for(unsigned int i = 0; i < _dynamicObjects.size(); ++i) {
 		Octree* current = this;
 		GameObject* currentObject = _dynamicObjects[i];
 
@@ -192,7 +192,7 @@ void Octree::updateNodes() {
 	int childCount = 0;
 
 	//remove any dead branches from the tree
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		if(_childNodes[i] == nullptr) continue;
 
 		if(_childNodes[i]->_lifetime == 0) {
@@ -214,156 +214,105 @@ void Octree::clearObjects() {
 
 	if(_depth >= _TOTAL_DEPTH) return;
 
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		if(_childNodes[i] != nullptr) _childNodes[i]->clearObjects();
 	}
 }
 
-void Octree::checkCollisions() {
-	//only execute for the root node
-	unsigned int dynamicsCount = _dynamicObjects.size();
-	unsigned int staticsCount = _staticObjects.size();
-
-	//execute collision detection for at least 2 objects in the object list
-	if((dynamicsCount + staticsCount) > 1) {
-		for(unsigned int i = 0; i < dynamicsCount; i++) {
-			BoundingBox* one = _dynamicObjects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
-			BoundingBox* other = nullptr;
-			AbstractBehaviour* oneBehaviour = _dynamicObjects[i]->getBehaviour();
-
-			if(one == nullptr) continue;
-
-			//check against other dynamic objects
-			for(unsigned int j = i; j < dynamicsCount; j++) {
-				if(j == i) continue; //avoid checking against itself
-
-				other = _dynamicObjects[j]->getBoundingBox();
-				if(other == nullptr) continue;
-
-				TestLog::COLLISION_CHECKS++;
-
-				//collision detection calculation
-				if(one->collidesWith(other)) {
-					//notify behaviour about the collision
-					oneBehaviour->onCollision(other); //only resolve one cube with this setup
-					//_dynamicObjects[j]->getBehaviour()->onCollision(one);
-
-					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _dynamicObjects[j]->getName() << std::endl;
-					TestLog::COLLISIONS++;
-				}
-			}
-
-			//check against static objects
-			for(unsigned int j = 0; j < staticsCount; j++) {
-				other = _staticObjects[j]->getBoundingBox();
-				if(other == nullptr) continue;
-
-				TestLog::COLLISION_CHECKS++;
-
-				//collision detection calculation
-				if(one->collidesWith(other)) {
-					//notify behaviour about the collision
-					oneBehaviour->onCollision(other); //only resolve one cube with this setup
-					//_staticObjects[j]->getBehaviour()->onCollision(one);
-
-					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _staticObjects[j]->getName() << std::endl;
-					TestLog::COLLISIONS++;
-				}
-			}
-		}
-	}
-
-	if(_depth >= _TOTAL_DEPTH) return; //when no children nodes are left
-
-	//check collisions in children
-	for(int i = 0; i < 8; i++) {
-		if(_childNodes[i] != nullptr) _childNodes[i]->_checkCollisions(_dynamicObjects); //forward the dynamic objects to the children
-	}
-}
-
-void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
-	if(_octantRenderer != nullptr) {
-		if((_dynamicObjects.size() + _staticObjects.size()) <= 0) _octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue, when there are no objects are in the octant
-		else _octantRenderer->setLineColor(glm::vec4(0.5f, 0.0f, 0.0f, 1.0f)); //purple, when there are objectics in the octant
-
-		//render self
-		_octantRenderer->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
-	}
-
-	if(_depth >= _TOTAL_DEPTH) return;
-
-	//render children
-	for(int i = 0; i < 8; i++) {
-		if(_childNodes[i] != nullptr) _childNodes[i]->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
-	}
-}
-
-void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
+void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 	unsigned int dynamicsCount = _dynamicObjects.size();
 	unsigned int staticsCount = _staticObjects.size();
 	unsigned int parentObjectsCount = parentObjects.size();
 
+	_resetCollisionStates();
+
 	//execute collision detection for at least 2 objects in the object list or for 1 object each in the object list and the root node list
 	if((dynamicsCount + staticsCount + parentObjectsCount) > 1) {
-		for(unsigned i = 0; i < dynamicsCount; i++) {
-			BoundingBox* one = _dynamicObjects[i]->getBoundingBox(); //no need to get collider every time in the other for loop
-			BoundingBox* other = nullptr;
-			AbstractBehaviour* oneBehaviour = _dynamicObjects[i]->getBehaviour();
+		GameObject* currentObject = nullptr;
+		GameObject* otherObject = nullptr;
+		BoundingBox* currentCollider = nullptr;
+		BoundingBox* otherCollider = nullptr;
+		AbstractBehaviour* currentBehaviour = nullptr;
+		AbstractBehaviour* otherBehaviour = nullptr;
 
-			if(one == nullptr) continue;
+		for(unsigned i = 0; i < dynamicsCount; ++i) {
+			currentObject = _dynamicObjects[i];
 
+			if(currentObject == nullptr) continue;
+
+			currentCollider = currentObject->getBoundingBox(); //no need to get collider every time in the other for loop
+			otherCollider = nullptr;
+			
+			currentBehaviour = currentObject->getBehaviour();
+			otherBehaviour = nullptr;
+
+			if(currentCollider == nullptr) continue; //allow the behaviour to be null
+			
 			//check against other dynamic objects
-			for(unsigned j = i; j < dynamicsCount; j++) {
-				if(j == i) continue; //avoid checking against itself
+			for(unsigned j = i + 1; j < dynamicsCount; ++j) {
+				otherObject = _dynamicObjects[j];
 
-				other = _dynamicObjects[j]->getBoundingBox();
-				if(other == nullptr) continue;
+				if(otherObject == nullptr) continue;
+
+				otherCollider = otherObject->getBoundingBox();
+				otherBehaviour = otherObject->getBehaviour();
+
+				if(otherCollider == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
 
 				//collision detection calculation
-				if(one->collidesWith(other)) {
+				if(currentCollider->checkCollision(otherCollider)) {
 					//notify behaviour about the collision
-					oneBehaviour->onCollision(other); //only resolve one cube with this setup
-					//_dynamicObjects[j]->getBehaviour()->onCollision(one);
+					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
+					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _dynamicObjects[j]->getName() << std::endl;
 					TestLog::COLLISIONS++;
 				}
 			}
 
-			//check against objects in the root node
-			for(unsigned j = 0; j < parentObjectsCount; j++) {
-				other = parentObjects[j]->getBoundingBox();
-				if(other == nullptr) continue;
+			//check against objects in the parent node
+			for(unsigned j = 0; j < parentObjectsCount; ++j) {
+				otherObject = parentObjects[j];
+
+				if(otherObject == nullptr) continue;
+
+				otherCollider = otherObject->getBoundingBox();
+				otherBehaviour = otherObject->getBehaviour();
+
+				if(otherCollider == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
 
 				//collision detection calculation
-				if(one->collidesWith(other)) {
+				if(currentCollider->checkCollision(otherCollider)) {
 					//notify behaviour about the collision
-					oneBehaviour->onCollision(other); //only resolve one cube with this setup
-					//parentObjects[j]->getBehaviour()->onCollision(one);
+					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
+					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + parentObjects[j]->getName() << std::endl;
 					TestLog::COLLISIONS++;
 				}
 			}
 
 			//check against static objects
-			for(unsigned int j = 0; j < staticsCount; j++) {
-				other = _staticObjects[j]->getBoundingBox();
-				if(other == nullptr) continue;
+			for(unsigned int j = 0; j < staticsCount; ++j) {
+				otherObject = _staticObjects[j];
+
+				if(otherObject == nullptr) continue;
+
+				otherCollider = otherObject->getBoundingBox();
+				otherBehaviour = otherObject->getBehaviour();
+
+				if(otherCollider == nullptr) continue;
 
 				TestLog::COLLISION_CHECKS++;
 
 				//collision detection calculation
-				if(one->collidesWith(other)) {
+				if(currentCollider->checkCollision(otherCollider)) {
 					//notify behaviour about the collision
-					oneBehaviour->onCollision(other); //only resolve one cube with this setup
-					//_staticObjects[j]->getBehaviour()->onCollision(one);
+					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
+					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					std::cout << "collision between " + _dynamicObjects[i]->getName() + " and " + _staticObjects[j]->getName() << std::endl;
 					TestLog::COLLISIONS++;
 				}
 			}
@@ -376,8 +325,25 @@ void Octree::_checkCollisions(std::vector<GameObject*> parentObjects) {
 	parentObjects.insert(parentObjects.end(), _dynamicObjects.begin(), _dynamicObjects.end()); //append the object list of this node to the parent objects list
 
 	//check collisions in children
-	for(int i = 0; i < 8; i++) {
-		if(_childNodes[i] != nullptr) _childNodes[i]->_checkCollisions(parentObjects); //forward the merged vector by value (copy) to all children nodes
+	for(int i = 0; i < 8; ++i) {
+		if(_childNodes[i] != nullptr) _childNodes[i]->checkCollisions(parentObjects); //forward the merged vector by value (copy) to all children nodes
+	}
+}
+
+void Octree::render(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {
+	if(_octantRenderer != nullptr) {
+		if((_dynamicObjects.size() + _staticObjects.size()) <= 0) _octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue, when there are no objects are in the octant
+		else _octantRenderer->setLineColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.5f)); //red, when there are objects in the octant
+
+		//render self
+		_octantRenderer->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
+	}
+
+	if(_depth >= _TOTAL_DEPTH) return;
+
+	//render children
+	for(int i = 0; i < 8; ++i) {
+		if(_childNodes[i] != nullptr) _childNodes[i]->render(pModelMatrix, pViewMatrix, pProjectionMatrix);
 	}
 }
 
@@ -401,7 +367,7 @@ void Octree::_initOctree(int depth) {
 	areas[7] = new BoundingBox(center + glm::vec3(octantHalfSize.x, octantHalfSize.y, octantHalfSize.z), octantHalfSize); //top, front, right
 
 	//recursively create new nodes and tell them the new remaining depth
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		_childNodes[i] = new Octree(areas[i], depth - 1, this);
 	}
 }
@@ -437,7 +403,7 @@ void Octree::_insert(GameObject * movedObject) {
 		bool foundNode = false;
 
 		//check which or if an area can contain the object better
-		for(int i = 0; i < 8; i++) {
+		for(int i = 0; i < 8; ++i) {
 			if(foundNode) break;
 
 			BoundingBox* area = areas[i];
@@ -470,27 +436,54 @@ void Octree::_initNode(BoundingBox * bounds, GameObject * movedObject) {
 	_dynamicObjects.push_back(movedObject);
 	_bounds = bounds;
 	_octantRenderer = new LineRenderer(bounds, true);
-	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 0.5f, 0.5f)); //blue
+	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); //blue
+}
+
+void Octree::_resetCollisionStates() {
+	for(unsigned int i = 0; i < _dynamicObjects.size(); ++i) {
+		_dynamicObjects[i]->getBehaviour()->isColliding = false;
+	}
+
+	for(unsigned int i = 0; i < _staticObjects.size(); ++i) {
+		_staticObjects[i]->getBehaviour()->isColliding = false;
+	}
+}
+
+void Octree::evaluateCollisionStates() {
+	for(unsigned int i = 0; i < _dynamicObjects.size(); ++i) {
+		_dynamicObjects[i]->getBehaviour()->checkCollisionExit();
+	}
+
+	for(unsigned int i = 0; i < _staticObjects.size(); ++i) {
+		_staticObjects[i]->getBehaviour()->checkCollisionExit();
+	}
+
+	if(_depth >= _TOTAL_DEPTH) return; //terminate recursion
+
+	//recursively filter the childnodes for static objects
+	for(int i = 0; i < 8; ++i) {
+		if(_childNodes[i] != nullptr) _childNodes[i]->evaluateCollisionStates();
+	}
 }
 
 void Octree::filterStatics() {
 	//filter the object list for dynamic and static objects and store them accordingly
-	for(unsigned int i = 0; i < _dynamicObjects.size(); i++) {
+	for(unsigned int i = 0; i < _dynamicObjects.size(); ++i) {
 		if(_dynamicObjects[i]->isStatic()) {
 			_staticObjects.push_back(_dynamicObjects[i]);
-			//_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), _staticObjects[i]), _dynamicObjects.end()); //optimization but removing while iterating is dangerous
+			//_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), _staticObjects[i]), _dynamicObjects.end()); //optimization, but removing while iterating is dangerous
 		}
 	}
 
 	//rather remove objects safely from the dynamics list after filling the statics list
-	for(unsigned int i = 0; i < _staticObjects.size(); i++) {
+	for(unsigned int i = 0; i < _staticObjects.size(); ++i) {
 		_dynamicObjects.erase(std::remove(_dynamicObjects.begin(), _dynamicObjects.end(), _staticObjects[i]), _dynamicObjects.end());
 	}
 
 	if(_depth >= _TOTAL_DEPTH) return; //terminate recursion
 
 	//recursively filter the childnodes for static objects
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; ++i) {
 		if(_childNodes[i] != nullptr) _childNodes[i]->filterStatics();
 	}
 }
@@ -503,7 +496,7 @@ void Octree::_destructOctree() {
 
 	if(_depth >= _TOTAL_DEPTH) return;
 
-	for(unsigned int i = 0; i < 8; i++) {
+	for(unsigned int i = 0; i < 8; ++i) {
 		delete _childNodes[i];
 	}
 }

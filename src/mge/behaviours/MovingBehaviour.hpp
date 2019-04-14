@@ -5,6 +5,7 @@
 #include <glm.hpp>
 
 class BoundingBox;
+class LineRenderer;
 
 class MovingBehaviour : public AbstractBehaviour
 {
@@ -14,7 +15,8 @@ class MovingBehaviour : public AbstractBehaviour
 
 		virtual void update(float pStep);
 
-		virtual void onCollision(BoundingBox* other);
+		virtual void onCollisionEnter();
+		virtual void onCollisionExit();
 	
 	private:
 		glm::vec3 _direction;
@@ -24,6 +26,7 @@ class MovingBehaviour : public AbstractBehaviour
 		glm::vec3 _octreeBounds;
 
 		BoundingBox* _bounds;
+		LineRenderer* _colliderRenderer;
 
 		void _resolveOutOfBounds();
 

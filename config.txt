@@ -1,0 +1,5 @@
+Total Objects=300
+Static Objects=50
+Max Octree Depth=4
+Octree Node Threshold=5
+Use Double Dispatching=0

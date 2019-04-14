@@ -13,6 +13,7 @@ MovingBehaviour::MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 p
 	_octreeBounds = pOctreeBounds;
 
 	_bounds = nullptr;
+	_colliderRenderer = nullptr;
 }
 
 MovingBehaviour::~MovingBehaviour() {
@@ -30,37 +31,18 @@ void MovingBehaviour::update(float pStep) {
 	_resolveOutOfBounds();
 }
 
-void MovingBehaviour::onCollision(BoundingBox * other) {
-	if(_bounds == nullptr) _bounds = _owner->getBoundingBox();
+void MovingBehaviour::onCollisionEnter() {
+	if(_colliderRenderer == nullptr) _colliderRenderer = _owner->getColliderRenderer();
 
-	//cheaply resolve collisions
-	glm::vec3 center = _bounds->getCenter();
-	glm::vec3 halfSize = _bounds->getHalfSize();
-	glm::vec3 otherCenter = other->getCenter();
-	glm::vec3 otherHalfSize = other->getHalfSize();
+	_colliderRenderer->setLineColor(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); //red, when colliding
 
-	glm::vec3 translationVec = glm::vec3(0, 0, 0);
+	std::cout << _owner->getName() + " is colliding" << std::endl;
+}
 
-	if(center.x >= otherCenter.x) {
-		translationVec.x = otherCenter.x + otherHalfSize.x + halfSize.x + 0.5f;
-	} else {
-		translationVec.x = otherCenter.x - otherHalfSize.x - halfSize.x - 0.5f;
-	}
+void MovingBehaviour::onCollisionExit() {
+	_colliderRenderer->setLineColor(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)); //green, when not colliding
 
-	if(center.y >= otherCenter.y) {
-		translationVec.y = otherCenter.y + otherHalfSize.y + halfSize.y + 0.5f;
-	} else {
-		translationVec.y = otherCenter.y - otherHalfSize.y - halfSize.y - 0.5f;
-	}
-
-	if(center.z >= otherCenter.z) {
-		translationVec.z = otherCenter.z + otherHalfSize.z + halfSize.z + 0.5f;
-	} else {
-		translationVec.z = otherCenter.z - otherHalfSize.z - halfSize.z - 0.5f;
-	}
-
-	_owner->setLocalPosition(otherCenter + translationVec);
-	_direction *= -1;
+	std::cout << _owner->getName() + " is not colliding anymore" << std::endl;
 }
 
 void MovingBehaviour::_resolveOutOfBounds() {

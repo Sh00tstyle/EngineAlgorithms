@@ -101,7 +101,7 @@ void AbstractGame::run()
 	while (_window->isOpen()) {
 		//execute test for max 30s
 		if(TestLog::time() >= 30.0f) {
-			TestLog::writeToFile();
+			TestLog::writeResultsToFile();
 
 			_window->close();
 			return;

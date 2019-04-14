@@ -145,7 +145,7 @@ bool BoundingBox::isColliding(OBB * one, OBB * other) {
 }
 
 bool BoundingBox::contains(BoundingBox * bounds, BoundingBox * boxToCheck) {
-	//returns true if the bounds fully contain the other bounds
+	//returns true if the bounds fully contains the other bounds
 	glm::vec3 min = bounds->getMin();
 	glm::vec3 max = bounds->getMax();
 
@@ -160,6 +160,14 @@ bool BoundingBox::contains(BoundingBox * bounds, BoundingBox * boxToCheck) {
 		min.x <= otherMin.x &&
 		min.y <= otherMin.y &&
 		min.z <= otherMin.z;
+}
+
+bool BoundingBox::checkCollision(BoundingBox* other) {
+	if(TestLog::USE_DOUBLE_DISPATCHING) {
+		return collidesWith(other);
+	} else {
+		return collidesWithSwitch(other);
+	}
 }
 
 bool BoundingBox::collidesWith(BoundingBox * other) {

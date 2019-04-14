@@ -38,6 +38,8 @@
 
 #include "mge/util/TestLog.h"
 
+#include "config.hpp"
+
 //construct the game class into _window, _renderer and hud (other parts are initialized by build)
 MGEDemo::MGEDemo() :AbstractGame(), _hud(0) {
 }
@@ -77,7 +79,9 @@ void MGEDemo::_updateHud() {
 
 	//draw info from the tester class
 	debugInfo += std::string("FPS: ") + std::to_string(TestLog::FPS) + "\n";
-	debugInfo += std::string("Objects: ") + std::to_string(TestLog::OBJECTS) + "\n";
+	debugInfo += std::string("Total Objects: ") + std::to_string(TestLog::TOTAL_OBJECTS) + "\n";
+	debugInfo += std::string("Static Objects: ") + std::to_string(TestLog::STATIC_OBJECTS) + "\n";
+	debugInfo += std::string("Dynamic Objects: ") + std::to_string(TestLog::DYNAMIC_OBJECTS) + "\n";
 	debugInfo += std::string("Octree Depth: ") + std::to_string(TestLog::OCTREE_DEPTH) + "\n";
 	debugInfo += std::string("Octree Node Treshold: ") + std::to_string(TestLog::OCTREE_NODE_TRESHOLD) + "\n";
 	debugInfo += std::string("Octree Updates: ") + std::to_string(TestLog::OCTREE_UPDATES) + "\n";
@@ -85,6 +89,13 @@ void MGEDemo::_updateHud() {
 	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::COLLISIONS) + "\n";
 	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::FIT_TESTS) + "\n";
 	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n\n";
+	debugInfo += std::string("Double dispatching: ");
+
+	if(TestLog::USE_DOUBLE_DISPATCHING) {
+		debugInfo += std::string("true\n\n");
+	} else {
+		debugInfo += std::string("false\n\n");
+	}
 
 	TestLog::RESULT_INFO = debugInfo;
 
@@ -94,18 +105,26 @@ void MGEDemo::_updateHud() {
 
 void MGEDemo::_initTest() {
 	//Testing
-	TestLog::OBJECTS = 300;
-	TestLog::OCTREE_DEPTH = 4;
-	TestLog::OCTREE_NODE_TRESHOLD = 1;
+	if(!TestLog::readConfigFile(config::OCTREE_CFG_PATH, "config.txt")) {
+		TestLog::TOTAL_OBJECTS = 50;
+		TestLog::STATIC_OBJECTS = TestLog::TOTAL_OBJECTS * 0.0f;
+		TestLog::OCTREE_DEPTH = 4;
+		TestLog::OCTREE_NODE_TRESHOLD = 5;
+		TestLog::USE_DOUBLE_DISPATCHING = true;
+
+		TestLog::writeConfigFile(config::OCTREE_CFG_PATH, "config.txt");
+	}
+
+	TestLog::DYNAMIC_OBJECTS = TestLog::TOTAL_OBJECTS - TestLog::STATIC_OBJECTS;
 
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
-	glm::vec3 objectHalfSize = glm::vec3(0.5, 0.5, 0.5);
-	float speed = 5.0f;
+	glm::vec3 objectHalfSize = glm::vec3(0.5f);
+	float speed = 3.0f;
 
 	srand(0); //seed for the randomizer
 
 	//create testing objects
-	for(unsigned i = 0; i < TestLog::OBJECTS; i++) {
+	for(unsigned i = 0; i < TestLog::TOTAL_OBJECTS; i++) {
 		//randomize position based on the octree bounds
 		float xPos = rand() % (int)(octreeHalfSize.x * 2) - octreeHalfSize.x;
 		float yPos = rand() % (int)(octreeHalfSize.y * 2) - octreeHalfSize.y;
@@ -132,7 +151,10 @@ void MGEDemo::_initTest() {
 		newCube->setBoundingBox(new AABB(newCube, objectHalfSize)); //add collider to make it work
 		newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize));
 
-		//if(i < TestLog::OBJECTS * 0.8f) newCube->setStatic(true); //make 80% static
+		//newCube->setBoundingBox(new OBB(newCube, objectHalfSize));
+		//newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize, true));
+
+		if(i < TestLog::STATIC_OBJECTS) newCube->setStatic(true);
 
 		_world->add(newCube); //also adding to the octree
 	}

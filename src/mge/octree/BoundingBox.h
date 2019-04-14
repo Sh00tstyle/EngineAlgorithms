@@ -23,6 +23,9 @@ class BoundingBox {
 		//fit test
 		static bool contains(BoundingBox* bounds, BoundingBox* boxToCheck);
 
+		//warpper to decide whether to use double dispatching or not
+		bool checkCollision(BoundingBox* other);
+
 		//double dispatching
 		virtual bool collidesWith(BoundingBox* other);
 		virtual bool collidesWith(AABB* other);
@@ -53,6 +56,7 @@ class BoundingBox {
 		glm::vec3 _center;
 		glm::vec3 _halfSize;
 		GameObject* _owner;
+
 
 };
 

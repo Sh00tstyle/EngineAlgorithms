@@ -2,11 +2,13 @@
 #define OCTREE_H
 
 #include <vector>
+#include <map>
 
 class BoundingBox;
 class GameObject;
 class OctreeWorld;
 class LineRenderer;
+class AbstractBehaviour;
 
 class Octree {
 	public:
@@ -28,7 +30,8 @@ class Octree {
 		void updateNodes();
 
 		//collision
-		void checkCollisions();
+		void checkCollisions(std::vector<GameObject*> parentObjects); //important to pass by value and not by reference or pointer to get a copy we can safely modify
+		void evaluateCollisionStates();
 
 		//rendering
 		void render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix);
@@ -46,6 +49,7 @@ class Octree {
 		Octree* _parentNode; //reference to the parent node, is nullptr if it is the root note
 		std::vector<GameObject*> _dynamicObjects; //list of references to the objects that are stored in this node
 		std::vector<GameObject*> _staticObjects;
+		std::map<GameObject*, AbstractBehaviour*> _behaviours; //list of the behaviours of all objects
 		int _depth; //keeping track of the depth of this node
 
 		//octree updates
@@ -63,8 +67,8 @@ class Octree {
 		void _insert(GameObject* movedObject);
 		void _initNode(BoundingBox* bounds, GameObject* item);
 
-		//collision test
-		void _checkCollisions(std::vector<GameObject*> parentObjects); //important to pass by value and not by reference or pointer to get a copy we can safely modify
+		//reset collision states to false and evaluate them at the start and at the end of the frame respectively
+		void _resetCollisionStates();
 
 		//cleanup
 		void _destructOctree();

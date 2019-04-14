@@ -13,7 +13,7 @@ ShaderProgram* LineRenderer::_shader = nullptr;
 LineRenderer::LineRenderer(BoundingBox* pBounds, bool pIsOctree) {
 	//init the line renderer
 	_generateVertices(pBounds, pIsOctree);
-	_lineColor = glm::vec4(0.25f, 1.0f, 0.0f, 1.0f); //green
+	_lineColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); //green
 
 	_initShader();
 	_buffer();

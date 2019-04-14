@@ -158,3 +158,321 @@ Collisions: 134
 Fit Tests: 1396459
 Time: 30.024370
 
+FPS: 0
+Objects: 1000
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1235
+Collision Checks: 18485308
+Collisions: 4026
+Fit Tests: 1191144
+Time: 33.863880
+
+FPS: 29
+Objects: 1000
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1793
+Collision Checks: 1540732
+Collisions: 24
+Fit Tests: 342434
+Time: 30.011492
+
+FPS: 29
+Objects: 1000
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1782
+Collision Checks: 1530037
+Collisions: 24
+Fit Tests: 340343
+Time: 30.009331
+
+FPS: 25
+Objects: 1000
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1790
+Collision Checks: 1537639
+Collisions: 24
+Fit Tests: 341875
+Time: 29.999535
+
+FPS: 0
+Total Objects: 1000
+Static Objects: 500
+Dynamic Objects: 500
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1384
+Collision Checks: 20721557
+Collisions: 1914
+Fit Tests: 1335233
+Time: 36.094204
+
+FPS: 0
+Total Objects: 1000
+Static Objects: 900
+Dynamic Objects: 100
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 531
+Collision Checks: 25262419
+Collisions: 2489
+Fit Tests: 979018
+Time: 32.459091
+
+Using double dipatching: 1
+
+FPS: 59
+Total Objects: 300
+Static Objects: 270
+Dynamic Objects: 30
+Octree Depth: 5
+Octree Node Treshold: 5
+Octree Updates: 1797
+Collision Checks: 8466584
+Collisions: 89
+Fit Tests: 732188
+Time: 29.996992
+
+Using double dipatching: 1
+
+FPS: 0
+Total Objects: 300
+Static Objects: 270
+Dynamic Objects: 30
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1665
+Collision Checks: 7791289
+Collisions: 82
+Fit Tests: 677866
+Time: 33.391251
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 100
+Static Objects: 0
+Dynamic Objects: 100
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1797
+Collision Checks: 1656677
+Collisions: 90
+Fit Tests: 230422
+Time: 29.989077
+
+Double dispatching: true
+
+FPS: 51
+Total Objects: 300
+Static Objects: 0
+Dynamic Objects: 300
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1797
+Collision Checks: 10492686
+Collisions: 681
+Fit Tests: 831944
+Time: 30.009651
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 2
+Static Objects: 0
+Dynamic Objects: 2
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 276
+Collision Checks: 276
+Collisions: 1
+Fit Tests: 549
+Time: 34.435249
+
+Double dispatching: true
+
+FPS: 3
+Total Objects: 2
+Static Objects: 0
+Dynamic Objects: 2
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 811
+Collision Checks: 811
+Collisions: 44
+Fit Tests: 1619
+Time: 41.333527
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 2
+Static Objects: 0
+Dynamic Objects: 2
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 807
+Collision Checks: 807
+Collisions: 40
+Fit Tests: 1611
+Time: 31.841059
+
+Double dispatching: true
+
+FPS: 1
+Total Objects: 2
+Static Objects: 0
+Dynamic Objects: 2
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1450
+Collision Checks: 1450
+Collisions: 353
+Fit Tests: 2897
+Time: 50.639782
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 50
+Static Objects: 0
+Dynamic Objects: 50
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1798
+Collision Checks: 688932
+Collisions: 92
+Fit Tests: 121700
+Time: 29.995392
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1799
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 29.989408
+
+Double dispatching: false
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1796
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 30.021553
+
+Double dispatching: false
+
+FPS: 58
+Total Objects: 50
+Static Objects: 0
+Dynamic Objects: 50
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1797
+Collision Checks: 627688
+Collisions: 5
+Fit Tests: 97593
+Time: 30.002377
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 50
+Static Objects: 0
+Dynamic Objects: 50
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1789
+Collision Checks: 624840
+Collisions: 5
+Fit Tests: 97178
+Time: 29.994347
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 50
+Static Objects: 0
+Dynamic Objects: 50
+Octree Depth: 4
+Octree Node Treshold: 5
+Octree Updates: 1791
+Collision Checks: 625552
+Collisions: 5
+Fit Tests: 97278
+Time: 29.991837
+
+Double dispatching: true
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1799
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 29.999771
+
+Double dispatching: false
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1799
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 29.999224
+
+Double dispatching: false
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1798
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 29.990292
+
+Double dispatching: false
+
+FPS: 59
+Total Objects: 0
+Static Objects: 0
+Dynamic Objects: 0
+Octree Depth: 0
+Octree Node Treshold: 0
+Octree Updates: 1789
+Collision Checks: 0
+Collisions: 0
+Fit Tests: 0
+Time: 29.989742
+
+Double dispatching: false
+

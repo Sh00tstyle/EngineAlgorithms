@@ -1,6 +1,8 @@
 #ifndef ABSTRACTBEHAVIOUR_HPP
 #define ABSTRACTBEHAVIOUR_HPP
 
+#include <vector>
+
 class GameObject;
 class BoundingBox;
 
@@ -18,23 +20,31 @@ class AbstractBehaviour
 		AbstractBehaviour();
 		virtual ~AbstractBehaviour() = 0;
 
+		bool isColliding; //current frame
+
         //for internal administration, do not use directly
         virtual void setOwner (GameObject* pGameObject);
 
         //behaviour should be able to update itself every step and MUST be implemented
 		virtual void update(float pStep) = 0;
+
 		//notify the behaviour when a collision happened
-		virtual void onCollision(BoundingBox* other);
+		void setCollisionEnter();
+		void checkCollisionExit();
+
+		virtual void onCollisionEnter();
+		virtual void onCollisionExit();
 
     protected:
 
 		GameObject* _owner;
 
     private:
-
         //disallow copy and assignment
         AbstractBehaviour(const AbstractBehaviour&);
         AbstractBehaviour& operator=(const AbstractBehaviour&);
+
+		bool _wasColliding; //last frame
 
 };
 

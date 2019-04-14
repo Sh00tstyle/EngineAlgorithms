@@ -23,7 +23,9 @@ void OctreeWorld::update(float step) {
 	//updateOctree(); //version 1: clear and refill octree lists every frame
 	//buildOctree(); //version 2: trash and rebuild entire octree every frame
 	updateNodes(); //version 3: keep the existing tree and update the nodes
-	_octree->checkCollisions();
+
+	_octree->checkCollisions(std::vector<GameObject*>()); //pass an empty vector
+	_octree->evaluateCollisionStates(); //checks if colliders are not colliding anymore and updates them
 }
 
 
