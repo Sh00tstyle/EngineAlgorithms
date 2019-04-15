@@ -44,7 +44,7 @@ void OctreeWorld::updateOctree() {
 		}
 	}
 
-	TestLog::OCTREE_UPDATES++;
+	++TestLog::OCTREE_UPDATES;
 }
 
 void OctreeWorld::buildOctree() {
@@ -60,7 +60,7 @@ void OctreeWorld::buildOctree() {
 		//_octree->filterStatics();
 	}
 
-	TestLog::OCTREE_UPDATES++;
+	++TestLog::OCTREE_UPDATES;
 }
 
 void OctreeWorld::updateNodes() {
@@ -74,7 +74,7 @@ void OctreeWorld::updateNodes() {
 		_octree->updateNodes();
 	}
 
-	TestLog::OCTREE_UPDATES++;
+	++TestLog::OCTREE_UPDATES;
 }
 
 void OctreeWorld::renderOctree(const glm::mat4 & pModelMatrix, const glm::mat4 & pViewMatrix, const glm::mat4 & pProjectionMatrix) {

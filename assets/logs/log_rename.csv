@@ -1,0 +1,5 @@
+sep=,
+FPS,Frames,Total Objects,Static Objects,Dynamic Objects,OBB Collider,AABB Collider,Octree Depth,Octree Node Treshold,Octree Updates,Collision Checks,Collisions,Fit Tests,Time,Double dispatching
+336660,10101056,500,0,500,10,490,4,5,1796,26408119,1853,1459602,30.003736,true
+497144,14916990,500,0,500,10,490,4,5,1796,26408119,1853,1459602,30.005394,true
+58,9463523,500,0,500,10,490,4,5,1795,26397517,1853,1458837,30.008207,true

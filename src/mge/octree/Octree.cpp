@@ -259,7 +259,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 
 				if(otherCollider == nullptr) continue;
 
-				TestLog::COLLISION_CHECKS++;
+				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
 				if(currentCollider->checkCollision(otherCollider)) {
@@ -267,7 +267,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
 					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					TestLog::COLLISIONS++;
+					++TestLog::COLLISIONS;
 				}
 			}
 
@@ -282,7 +282,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 
 				if(otherCollider == nullptr) continue;
 
-				TestLog::COLLISION_CHECKS++;
+				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
 				if(currentCollider->checkCollision(otherCollider)) {
@@ -290,7 +290,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
 					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					TestLog::COLLISIONS++;
+					++TestLog::COLLISIONS;
 				}
 			}
 
@@ -305,7 +305,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 
 				if(otherCollider == nullptr) continue;
 
-				TestLog::COLLISION_CHECKS++;
+				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
 				if(currentCollider->checkCollision(otherCollider)) {
@@ -313,7 +313,7 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 					if(currentBehaviour != nullptr) currentBehaviour->setCollisionEnter();
 					if(otherBehaviour != nullptr) otherBehaviour->setCollisionEnter();
 
-					TestLog::COLLISIONS++;
+					++TestLog::COLLISIONS;
 				}
 			}
 		}

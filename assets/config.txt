@@ -1,0 +1,6 @@
+Total Objects=500
+Static Objects=0
+OBB Collider=10
+Max Octree Depth=4
+Octree Node Threshold=5
+Use Double Dispatching=1

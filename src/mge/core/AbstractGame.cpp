@@ -137,6 +137,8 @@ void AbstractGame::run()
 
 		//empty the event queue
 		_processEvents();
+
+		++TestLog::UPDATES;
     }
 }
 
