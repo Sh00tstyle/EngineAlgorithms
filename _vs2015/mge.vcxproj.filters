@@ -134,6 +134,9 @@
     <ClInclude Include="..\src\mge\octree\OBB.h">
       <Filter>MGE Source files\mge\octree</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\mge\util\TestSet.h">
+      <Filter>MGE Source files\mge\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
@@ -231,6 +234,9 @@
     </ClCompile>
     <ClCompile Include="..\src\mge\octree\OBB.cpp">
       <Filter>MGE Source files\mge\octree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\mge\util\TestSet.cpp">
+      <Filter>MGE Source files\mge\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

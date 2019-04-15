@@ -199,6 +199,7 @@
     <ClInclude Include="..\src\mge\octree\OctreeWorld.h" />
     <ClInclude Include="..\src\mge\util\DebugHud.hpp" />
     <ClInclude Include="..\src\mge\util\TestLog.h" />
+    <ClInclude Include="..\src\mge\util\TestSet.h" />
     <ClInclude Include="..\src\ShaderUtil.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -234,6 +235,7 @@
     <ClCompile Include="..\src\mge\octree\OctreeWorld.cpp" />
     <ClCompile Include="..\src\mge\util\DebugHud.cpp" />
     <ClCompile Include="..\src\mge\util\TestLog.cpp" />
+    <ClCompile Include="..\src\mge\util\TestSet.cpp" />
     <ClCompile Include="..\src\ShaderUtil.cpp" />
   </ItemGroup>
   <ItemGroup>

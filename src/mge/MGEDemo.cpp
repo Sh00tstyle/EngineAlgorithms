@@ -105,25 +105,6 @@ void MGEDemo::_updateHud() {
 }
 
 void MGEDemo::_initTest() {
-	//Testing
-	if(!TestLog::readConfigFile(config::OCTREE_CFG_PATH, "config.txt")) {
-		float staticFactor = 0.0f;
-		float obbFactor = 0.2f;
-
-		TestLog::TOTAL_OBJECTS = 50;
-		TestLog::STATIC_OBJECTS = TestLog::TOTAL_OBJECTS * staticFactor;
-		TestLog::DYNAMIC_OBJECTS = TestLog::TOTAL_OBJECTS - TestLog::STATIC_OBJECTS;
-
-		TestLog::OBB_COLLIDER = TestLog::DYNAMIC_OBJECTS * obbFactor;
-		TestLog::AABB_COLLIDER = TestLog::DYNAMIC_OBJECTS - TestLog::OBB_COLLIDER;
-
-		TestLog::OCTREE_DEPTH = 4;
-		TestLog::OCTREE_NODE_TRESHOLD = 5;
-		TestLog::USE_DOUBLE_DISPATCHING = true;
-
-		TestLog::writeConfigFile(config::OCTREE_CFG_PATH, "config.txt");
-	}
-
 	glm::vec3 octreeHalfSize = _world->OCTREE_HALF_SIZE;
 	glm::vec3 objectHalfSize = glm::vec3(0.5f);
 	float speed = 3.0f;

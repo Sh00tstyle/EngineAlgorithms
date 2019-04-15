@@ -3,6 +3,9 @@
 #include "mge/core/AbstractGame.hpp"
 #include "mge/MGEDemo.hpp"
 
+#include "mge/util/TestLog.h"
+#include "mge/config.hpp"
+
 /**
  * Main entry point for the Micro Engine.
 
@@ -20,13 +23,32 @@
  */
 int main()
 {
-    std::cout << "Starting Game" << std::endl;
+    std::cout << "Starting Tests" << std::endl;
 
-    AbstractGame* game = new MGEDemo();
-    game->initialize();
-    game->run();
+	if(!TestLog::readConfigFile(config::OCTREE_CFG_PATH, "config.txt")) {
+		
+		std::cout << "Cannot test without testsets" << std::endl;
 
-	delete game;
+		TestLog::writeConfigFile(config::OCTREE_CFG_PATH, "config.txt");
+
+		int blocker;
+		std::cin >> blocker; //block the application to read the console info
+
+		return 0;
+	}
+
+	for(unsigned int i = (TestLog::TESTSETS.size() - 1); i >= 0; --i) {
+		TestLog::setupTest(i);
+
+		//execute application for each testset
+		AbstractGame* game = new MGEDemo();
+		game->initialize();
+		game->run();
+
+		delete game;
+
+		std::system("CLS"); //clear the console
+	}
 
     return 0;
 }

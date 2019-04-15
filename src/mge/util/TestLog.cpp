@@ -2,8 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <vector>
 #include <sstream>
+
+#include "TestSet.h"
+
+std::vector<TestSet*> TestLog::TESTSETS;
+TestSet* TestLog::CURRENT_TESTSET = nullptr;
 
 unsigned int TestLog::FPS = 0;
 unsigned int TestLog::FRAMES = 0;
@@ -44,6 +48,27 @@ void TestLog::start() {
 float TestLog::time() {
 	std::chrono::duration<double> diff = std::chrono::steady_clock::now() - _START;
 	return diff.count();
+}
+
+void TestLog::setupTest(unsigned int testIndex) {
+	std::cout << "Starting test " << testIndex << std::endl;
+
+	start();
+
+	CURRENT_TESTSET = TESTSETS[testIndex];
+
+	TOTAL_OBJECTS = CURRENT_TESTSET->TotalObjects;
+
+	STATIC_OBJECTS = TOTAL_OBJECTS * CURRENT_TESTSET->StaticObjects;
+	DYNAMIC_OBJECTS = TOTAL_OBJECTS - STATIC_OBJECTS;
+
+	OBB_COLLIDER = TOTAL_OBJECTS * CURRENT_TESTSET->ObbCollider;
+	AABB_COLLIDER = TOTAL_OBJECTS - OBB_COLLIDER;
+
+	OCTREE_DEPTH = CURRENT_TESTSET->OctreeDepth;
+	OCTREE_NODE_TRESHOLD = CURRENT_TESTSET->NodeTheshold;
+
+	USE_DOUBLE_DISPATCHING = CURRENT_TESTSET->DoubleDispatching;
 }
 
 void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
@@ -128,7 +153,7 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 
 		fileWrite.close();
 	} else {
-		std::cout << "Unable to open file '" + filename + "' at " + filepath << std::endl;
+	std::cout << "Unable to open file '" + filename + "' at " + filepath << std::endl;
 	}
 }
 
@@ -142,7 +167,16 @@ void TestLog::writeConfigFile(std::string filepath, std::string filename) {
 		std::cout << "Writing config file '" + filename + "' to " + filepath << std::endl;
 
 		//write config values to file
-		file << "Total Objects=" << std::to_string(TestLog::TOTAL_OBJECTS) << "\n";
+		file << "Total Objects=" << std::to_string(TestLog::TOTAL_OBJECTS) << "\n\n";
+
+		file << "Default Testset" << "\n";
+		file << "Static Objects=" << std::to_string(TestLog::STATIC_OBJECTS) << "\n";
+		file << "OBB Collider=" << std::to_string(TestLog::OBB_COLLIDER) << "\n";
+		file << "Max Octree Depth=" << std::to_string(TestLog::OCTREE_DEPTH) << "\n";
+		file << "Octree Node Threshold=" << std::to_string(TestLog::OCTREE_NODE_TRESHOLD) << "\n";
+		file << "Use Double Dispatching=" << std::to_string(TestLog::USE_DOUBLE_DISPATCHING) << "\n\n";
+
+		file << "Testset Configs" << "\n";
 		file << "Static Objects=" << std::to_string(TestLog::STATIC_OBJECTS) << "\n";
 		file << "OBB Collider=" << std::to_string(TestLog::OBB_COLLIDER) << "\n";
 		file << "Max Octree Depth=" << std::to_string(TestLog::OCTREE_DEPTH) << "\n";
@@ -189,62 +223,266 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			}
 		}
 
-		if(lines.size() > 12) {
+		if(lines.size() > 16) {
 			std::cout << "Unable to read file format" << std::endl;
 
 			return false;
 		}
 
-		//convert content to values and store in variables
-		std::istringstream iss(tokens[1]);
-		int totalObjects;
-		iss >> totalObjects;
+		//general: total objects
+		std::vector<std::string> values;
+		std::string value;
+		std::istringstream valueStream(tokens[1]);
+
+		std::vector<unsigned int> totalObjects;
+		std::istringstream iss("");
+		iss.clear();
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			unsigned int totalObjectsValue;
+			iss >> totalObjectsValue; //convert to value
+
+			totalObjects.push_back(totalObjectsValue); //store in vector
+
+			iss.clear();
+		}
+
+		//default testset: static objects
+		iss.str(tokens[4]);
+
+		float defaultStaticObjects;
+		iss >> defaultStaticObjects;
 
 		iss.clear();
 
-		iss.str(tokens[3]);
-		int staticObjects;
-		iss >> staticObjects;
+		//default testset: obb collider
+		iss.str(tokens[6]);
+
+		float defaultObbCollider;
+		iss >> defaultObbCollider;
 
 		iss.clear();
 
-		iss.str(tokens[5]);
-		int obbCollider;
-		iss >> obbCollider;
+		//default testset: octree depth
+		iss.str(tokens[8]);
 
-		iss.clear();
-		
-		iss.str(tokens[7]);
-		int octreeDepth;
-		iss >> octreeDepth;
+		unsigned int defaultOctreeDepth;
+		iss >> defaultOctreeDepth;
 
 		iss.clear();
 
-		iss.str(tokens[9]);
-		int nodeThreshold;
-		iss >> nodeThreshold;
+		//default testset: node threshold
+		iss.str(tokens[10]);
+
+		unsigned int defaultNodeThreshold;
+		iss >> defaultNodeThreshold;
 
 		iss.clear();
 
-		iss.str(tokens[11]);
-		int useDoubleDispatching;
-		iss >> useDoubleDispatching;
+		//default testset: double dispatching
+		iss.str(tokens[12]);
+
+		unsigned int defaultDoubleDispatching;
+		iss >> defaultDoubleDispatching;
 
 		iss.clear();
 
-		if(staticObjects > totalObjects) staticObjects = totalObjects;
+		//testset configs: static objects
+		values.clear();
+		valueStream.str(tokens[15]);
 
-		TOTAL_OBJECTS = totalObjects;
-		STATIC_OBJECTS = staticObjects;
-		DYNAMIC_OBJECTS = TOTAL_OBJECTS - STATIC_OBJECTS;
+		std::vector<float> staticObjects;
 
-		if(obbCollider > DYNAMIC_OBJECTS) obbCollider = DYNAMIC_OBJECTS;
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
 
-		OBB_COLLIDER = obbCollider;
-		AABB_COLLIDER = DYNAMIC_OBJECTS - OBB_COLLIDER;
-		OCTREE_DEPTH = octreeDepth;
-		OCTREE_NODE_TRESHOLD = nodeThreshold;
-		USE_DOUBLE_DISPATCHING = useDoubleDispatching;
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			float staticObjectsValue;
+			iss >> staticObjectsValue; //convert to value
+
+			staticObjects.push_back(staticObjectsValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: obb collider
+		values.clear();
+		valueStream.str(tokens[17]);
+
+		std::vector<float> obbCollider;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			float obbColliderValue;
+			iss >> obbColliderValue; //convert to value
+
+			obbCollider.push_back(obbColliderValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: octree depth
+		values.clear();
+		valueStream.str(tokens[19]);
+
+		std::vector<unsigned int> octreeDepths;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			unsigned int octreeDepthValue;
+			iss >> octreeDepthValue; //convert to value
+
+			octreeDepths.push_back(octreeDepthValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: node theshold
+		values.clear();
+		valueStream.str(tokens[21]);
+
+		std::vector<unsigned int> nodeThesholds;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			unsigned int nodeThresholdValue;
+			iss >> nodeThresholdValue; //convert to value
+
+			nodeThesholds.push_back(nodeThresholdValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: double dispatching
+		values.clear();
+		valueStream.str(tokens[23]);
+
+		std::vector<unsigned int> doubleDispatchingValues;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			unsigned int doubleDispatchingValue;
+			iss >> doubleDispatchingValue; //convert to value
+
+			doubleDispatchingValues.push_back(doubleDispatchingValue); //store in vector
+
+			iss.clear();
+		}
+
+		//create testsets
+		TestSet* defaultSet = new TestSet(); //basic testset template
+		defaultSet->StaticObjects = defaultStaticObjects;
+		defaultSet->ObbCollider = defaultObbCollider;
+		defaultSet->OctreeDepth = defaultOctreeDepth;
+		defaultSet->NodeTheshold = defaultNodeThreshold;
+		defaultSet->DoubleDispatching = defaultDoubleDispatching;
+
+		TESTSETS.clear();
+		TestSet* currentTestSet = nullptr;
+
+		for(unsigned int i = 0; i < totalObjects.size(); ++i) {
+			//default testsets
+			currentTestSet = defaultSet->copy();
+
+			currentTestSet->TotalObjects = totalObjects[i];
+			currentTestSet->FileName = "log_default.csv";
+
+			TESTSETS.push_back(currentTestSet);
+
+			//octree depths
+			for(unsigned int j = 0; j < octreeDepths.size(); ++j) {
+				currentTestSet = defaultSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->OctreeDepth = octreeDepths[j];
+				currentTestSet->FileName = "log_octreedepth.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//node thresholds
+			for(unsigned int j = 0; j < nodeThesholds.size(); ++j) {
+				currentTestSet = defaultSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->NodeTheshold = nodeThesholds[j];
+				currentTestSet->FileName = "log_nodethreshold.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//static objects
+			for(unsigned int j = 0; j < staticObjects.size(); ++j) {
+				currentTestSet = defaultSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->StaticObjects = staticObjects[j];
+				currentTestSet->FileName = "log_staticobjects.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//obb collider
+			for(unsigned int j = 0; j < obbCollider.size(); ++j) {
+				currentTestSet = defaultSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->ObbCollider = obbCollider[j];
+				currentTestSet->FileName = "log_obbcollider.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//double dispatching
+			for(unsigned int j = 0; j < doubleDispatchingValues.size(); ++j) {
+				currentTestSet = defaultSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->DoubleDispatching = doubleDispatchingValues[j];
+				currentTestSet->FileName = "log_doubledispatching.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+		}
+
+		std::cout << "Read and generated " << TESTSETS.size() << " testsets\n" << std::endl;
+
+		delete defaultSet; //not needed anymore
 
 		return true;
 	}

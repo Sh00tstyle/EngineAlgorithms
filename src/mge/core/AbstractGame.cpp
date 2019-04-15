@@ -5,6 +5,7 @@
 #include "mge/octree/OctreeWorld.h"
 
 #include "mge/util/TestLog.h"
+#include "mge/util/TestSet.h"
 
 #include "mge/config.hpp"
 
@@ -81,7 +82,6 @@ void AbstractGame::_initializeRenderer() {
 void AbstractGame::_initializeWorld() {
     //setup the world
 	std::cout << "Initializing world..." << std::endl;
-	TestLog::start();
 	_world = new OctreeWorld();
     std::cout << "World initialized." << std::endl << std::endl;
 }
@@ -103,7 +103,7 @@ void AbstractGame::run()
 	while (_window->isOpen()) {
 		//execute test for max 30s
 		if(TestLog::time() >= 30.0f) {
-			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, "log_rename.csv");
+			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, TestLog::CURRENT_TESTSET->FileName);
 
 			_window->close();
 			return;
@@ -118,6 +118,14 @@ void AbstractGame::run()
 		    while (timeSinceLastUpdate > timePerFrame) {
                 timeSinceLastUpdate -= timePerFrame;
                 _update(timePerFrame.asSeconds());
+
+				//execute test for max 30s
+				if(TestLog::time() >= 30.0f) {
+					TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, TestLog::CURRENT_TESTSET->FileName);
+
+					_window->close();
+					return;
+				}
 		    }
 
             _render();

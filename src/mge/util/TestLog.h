@@ -3,10 +3,16 @@
 
 #include <chrono>
 #include <string>
+#include <vector>
+
+struct TestSet;
 
 class TestLog {
 
 	public:
+		static std::vector<TestSet*> TESTSETS;
+		static TestSet* CURRENT_TESTSET;
+
 		static unsigned int FPS; //frames per second
 		static unsigned int FRAMES; //total frame count
 		static unsigned int TOTAL_OBJECTS; //total amount of test cubes
@@ -24,6 +30,8 @@ class TestLog {
 
 		static void start(); //initialize/reset the test class
 		static float time(); //returns the time that has elapsed since the start
+
+		static void setupTest(unsigned int testIndex);
 
 		static void writeResultsToFile(std::string filepath, std::string filename);
 		static void writeConfigFile(std::string filepath, std::string filename);
