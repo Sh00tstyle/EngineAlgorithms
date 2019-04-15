@@ -123,6 +123,8 @@ void AbstractGame::run()
             _render();
             _window->display();
 
+			++TestLog::FRAMES;
+
             //fps count is updated once every 1 second
             frameCount++;
             timeSinceLastFPSCalculation += renderClock.restart().asSeconds();
@@ -132,13 +134,10 @@ void AbstractGame::run()
                 timeSinceLastFPSCalculation -= 1;
                 frameCount = 0;
             }
-
 		}
 
 		//empty the event queue
 		_processEvents();
-
-		++TestLog::UPDATES;
     }
 }
 

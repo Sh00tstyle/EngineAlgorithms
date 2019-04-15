@@ -6,7 +6,7 @@
 #include <sstream>
 
 unsigned int TestLog::FPS = 0;
-unsigned int TestLog::UPDATES = 0;
+unsigned int TestLog::FRAMES = 0;
 unsigned int TestLog::TOTAL_OBJECTS = 0;
 unsigned int TestLog::STATIC_OBJECTS = 0;
 unsigned int TestLog::DYNAMIC_OBJECTS = 0;
@@ -24,7 +24,7 @@ std::chrono::steady_clock::time_point TestLog::_START;
 
 void TestLog::start() {
 	FPS = 0;
-	UPDATES = 0;
+	FRAMES = 0;
 	TOTAL_OBJECTS = 0;
 	STATIC_OBJECTS = 0;
 	DYNAMIC_OBJECTS = 0;
@@ -82,10 +82,12 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 	if(fileWrite.is_open()) {
 		std::cout << "Writing log file '" + filename + "' to " + filepath << std::endl;
 
+		TestLog::FPS = TestLog::FRAMES / TestLog::time(); //average fps
+
 		if(generateHeader) {
 			fileWrite << "sep=,\n"; //tells excel to seperate by comma
 			fileWrite << "FPS,";
-			fileWrite << "Updates,";
+			fileWrite << "Frames,";
 			fileWrite << "Total Objects,";
 			fileWrite << "Static Objects,";
 			fileWrite << "Dynamic Objects,";
@@ -104,7 +106,7 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 		fileWrite << "\n";
 
 		fileWrite << std::to_string(TestLog::FPS) << ",";
-		fileWrite << std::to_string(TestLog::UPDATES) << ",";
+		fileWrite << std::to_string(TestLog::FRAMES) << ",";
 		fileWrite << std::to_string(TestLog::TOTAL_OBJECTS) << ",";
 		fileWrite << std::to_string(TestLog::STATIC_OBJECTS) << ",";
 		fileWrite << std::to_string(TestLog::DYNAMIC_OBJECTS) << ",";

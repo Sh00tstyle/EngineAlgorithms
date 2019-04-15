@@ -79,7 +79,7 @@ void MGEDemo::_updateHud() {
 
 	//draw info from the tester class
 	debugInfo += std::string("FPS: ") + std::to_string(TestLog::FPS) + "\n";
-	debugInfo += std::string("Updates: ") + std::to_string(TestLog::UPDATES) + "\n";
+	debugInfo += std::string("Frames: ") + std::to_string(TestLog::FRAMES) + "\n";
 	debugInfo += std::string("Total Objects: ") + std::to_string(TestLog::TOTAL_OBJECTS) + "\n";
 	debugInfo += std::string("Static Objects: ") + std::to_string(TestLog::STATIC_OBJECTS) + "\n";
 	debugInfo += std::string("Dynamic Objects: ") + std::to_string(TestLog::DYNAMIC_OBJECTS) + "\n";

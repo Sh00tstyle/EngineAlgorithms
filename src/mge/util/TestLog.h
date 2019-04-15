@@ -8,7 +8,7 @@ class TestLog {
 
 	public:
 		static unsigned int FPS; //frames per second
-		static unsigned int UPDATES; //total frame count
+		static unsigned int FRAMES; //total frame count
 		static unsigned int TOTAL_OBJECTS; //total amount of test cubes
 		static unsigned int STATIC_OBJECTS; //amount of static cubes
 		static unsigned int DYNAMIC_OBJECTS; //amount of dynamic cubes
