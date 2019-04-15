@@ -50,5 +50,10 @@ int main()
 		std::system("CLS"); //clear the console
 	}
 
+	//cleanup
+	for(unsigned int i = 0; i < TestLog::TESTSETS.size(); ++i) {
+		delete TestLog::TESTSETS[i];
+	}
+
     return 0;
 }
