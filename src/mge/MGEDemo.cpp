@@ -113,6 +113,7 @@ void MGEDemo::_initTest() {
 
 	//create testing objects
 	int obbCounter = 0;
+	GameObject* newCube = nullptr;
 
 	for(unsigned i = 0; i < TestLog::TOTAL_OBJECTS; i++) {
 		//randomize position based on the octree bounds
@@ -137,7 +138,7 @@ void MGEDemo::_initTest() {
 		glm::vec3 movementDirection = glm::vec3(xDir, yDir, zDir);
 
 		//create test object
-		GameObject* newCube = new GameObject("Cube " + std::to_string(i), objectPos);
+		newCube = new GameObject("Cube " + std::to_string(i), objectPos);
 		newCube->setBehaviour(new MovingBehaviour(movementDirection, speed, octreeHalfSize));
 
 		//add collider types
@@ -158,9 +159,6 @@ void MGEDemo::_initTest() {
 
 		_world->add(newCube); //also adding to the octree
 	}
-
-	TestLog::OBB_COLLIDER = obbCounter;
-	TestLog::AABB_COLLIDER = TestLog::DYNAMIC_OBJECTS - TestLog::OBB_COLLIDER;
 }
 
 void MGEDemo::_processEvents() {

@@ -20,6 +20,9 @@ LineRenderer::LineRenderer(BoundingBox* pBounds, bool pIsOctree) {
 }
 
 LineRenderer::~LineRenderer() {
+	//cleanup gpu memory
+	glDeleteVertexArrays(1, &_vao);
+	glDeleteBuffers(1, &_vbo);
 }
 
 void LineRenderer::render(const glm::mat4& pModelMatrix, const glm::mat4& pViewMatrix, const glm::mat4& pProjectionMatrix) {

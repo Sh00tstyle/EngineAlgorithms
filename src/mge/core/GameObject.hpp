@@ -93,9 +93,9 @@ class GameObject
 		AbstractBehaviour* _behaviour;
 		AbstractMaterial* _material;
 		World* _world;
+
 		BoundingBox* _bounds;
 		LineRenderer* _colliderRenderer;
-		MovingBehaviour* _movingBehaviour;
 
 		bool _isStatic;
 

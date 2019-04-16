@@ -23,6 +23,9 @@ GameObject::~GameObject()
     }
 
     //do not forget to delete behaviour, material, mesh, collider manually if required!
+	delete _mesh;
+	delete _behaviour;
+	delete _material;
 
 	delete _bounds;
 	delete _colliderRenderer;

@@ -49,7 +49,6 @@ class Octree {
 		Octree* _parentNode; //reference to the parent node, is nullptr if it is the root note
 		std::vector<GameObject*> _dynamicObjects; //list of references to the objects that are stored in this node
 		std::vector<GameObject*> _staticObjects;
-		std::map<GameObject*, AbstractBehaviour*> _behaviours; //list of the behaviours of all objects
 		int _depth; //keeping track of the depth of this node
 
 		//octree updates
