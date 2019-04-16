@@ -37,7 +37,7 @@ int main()
 		return 0;
 	}
 
-	for(unsigned int i = (TestLog::TESTSETS.size() - 1); i >= 0; --i) {
+	for(unsigned int i = 0; i < TestLog::TESTSETS.size(); ++i) {
 		TestLog::setupTest(i);
 
 		//execute application for each testset

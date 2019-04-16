@@ -1,4 +1,4 @@
-Total Objects=10,50,100,250,500,750,1000,1250,1500,1750,2000
+Total Objects=500,750,1000,1250
 
 Default Testset
 Static Objects=0
@@ -8,8 +8,8 @@ Octree Node Threshold=4
 Use Double Dispatching=1
 
 Testset configs
-Static Objects=0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1
-OBB Collider=0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1
-Max Octree Depth=0,1,2,3,4,5,6,7,8,9
-Octree Node Threshold=0,1,2,3,4,5,7,10
-Use Double Dispatching=0,1
+Static Objects=0
+OBB Collider=0
+Max Octree Depth=4
+Octree Node Threshold=4
+Use Double Dispatching=1

@@ -11,9 +11,9 @@ public:
 
 	std::string FileName;
 	unsigned int TotalObjects;
-	unsigned int StaticObjects;
+	float StaticObjects;
 	float ObbCollider;
-	float OctreeDepth;
+	unsigned int OctreeDepth;
 	unsigned int NodeTheshold;
 	bool DoubleDispatching;
 
