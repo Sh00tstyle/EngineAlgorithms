@@ -177,10 +177,7 @@ void BoundingBox::setDirtyFlag(bool value) {
 }
 
 bool BoundingBox::isInRange(BoundingBox * other) {
-	glm::vec3 center = getCenter();
-	glm::vec3 otherCenter = other->getCenter();
-
-	float sqrDistance = glm::distance2(center, otherCenter);
+	float sqrDistance = glm::distance2(getCenter(), other->getCenter());
 
 	if(sqrDistance > _minSqrDistance)
 		return false; //not in range
@@ -197,22 +194,18 @@ bool BoundingBox::checkCollision(BoundingBox* other) {
 }
 
 bool BoundingBox::collidesWith(BoundingBox * other) {
-	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
 bool BoundingBox::collidesWith(AABB * other) {
-	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
 bool BoundingBox::collidesWith(OBB * other) {
-	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 
 bool BoundingBox::collidesWithSwitch(BoundingBox * other) {
-	//exists for the sake of not making the BoundingBox class abstract
 	return false;
 }
 

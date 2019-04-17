@@ -1,4 +1,4 @@
-Total Objects=1000,2000
+Total Objects=3000
 
 Default Testset
 Static Objects=0.5

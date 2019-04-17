@@ -4,7 +4,6 @@
 #include <glm.hpp>
 
 class GameObject;
-class LineRenderer;
 class AABB;
 class OBB;
 
