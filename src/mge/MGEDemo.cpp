@@ -112,7 +112,7 @@ void MGEDemo::_initTest() {
 	srand(0); //seed for the randomizer
 
 	//create testing objects
-	int obbCounter = 0;
+	unsigned int obbCounter = 0;
 	GameObject* newCube = nullptr;
 
 	for(unsigned i = 0; i < TestLog::TOTAL_OBJECTS; i++) {

@@ -23,6 +23,12 @@ class BoundingBox {
 		//fit test
 		static bool contains(BoundingBox* bounds, BoundingBox* boxToCheck);
 
+		//set the dirty flag for position calculations
+		void setDirtyFlag(bool value);
+
+		//returns true, if the other bounding box is in the specified range
+		bool isInRange(BoundingBox* other);
+
 		//warpper to decide whether to use double dispatching or not
 		bool checkCollision(BoundingBox* other);
 
@@ -53,11 +59,19 @@ class BoundingBox {
 		static const glm::mat4 _AABB_AXES; //uniform matrix to replace the object transform for AABB
 
 		unsigned int _type; //0 = BoundingBox, 1 = AABB, 2 = OBB
-		glm::vec3 _center;
+
 		glm::vec3 _halfSize;
+
+		glm::vec3 _center;
+		glm::vec3 _min;
+		glm::vec3 _max;
+
+		bool _isDirty;
+		float _minSqrDistance;
+		
 		GameObject* _owner;
 
-
+		void _cleanDirtyFlag();
 };
 
 #endif

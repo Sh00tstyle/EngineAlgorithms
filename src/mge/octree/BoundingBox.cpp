@@ -1,5 +1,8 @@
-#include <iostream>
 #include "BoundingBox.h"
+
+#include <iostream>
+#include <glm/gtx/norm.hpp> //squared distance
+
 #include "mge\core\GameObject.hpp"
 #include "mge/core/LineRenderer.hpp"
 #include "AABB.h"
@@ -13,18 +16,25 @@ const glm::mat4 BoundingBox::_AABB_AXES = {
 	0, 0, 0, 1
 };
 
-BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize, unsigned int pType): _type(pType) {
+BoundingBox::BoundingBox(glm::vec3 pCenter, glm::vec3 pHalfSize, unsigned int pType) : _type(pType), _isDirty(true) {
 	//stationary bounds for the octree
 	_owner = nullptr;
-	_center = pCenter;
 	_halfSize = pHalfSize;
+	
+	_center = pCenter;
+
+	_cleanDirtyFlag();
 }
 
-BoundingBox::BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize, unsigned int pType) : _type(pType) {
+BoundingBox::BoundingBox(GameObject* pOwner, glm::vec3 pHalfSize, unsigned int pType) : _type(pType), _isDirty(true) {
 	//dynamic bounds for object that might move (but can be set to static)
 	_owner = pOwner;
-	_center = _owner->getLocalPosition();
 	_halfSize = pHalfSize;
+
+	float distanceCheckRadius = _halfSize.x * 2.0f; //"real" minimum distance required to allow collision checks
+	_minSqrDistance = distanceCheckRadius * distanceCheckRadius; //squared minimum distance to allow collision checks
+
+	_cleanDirtyFlag();
 }
 
 BoundingBox::~BoundingBox() {
@@ -162,6 +172,22 @@ bool BoundingBox::contains(BoundingBox * bounds, BoundingBox * boxToCheck) {
 		min.z <= otherMin.z;
 }
 
+void BoundingBox::setDirtyFlag(bool value) {
+	_isDirty = value;
+}
+
+bool BoundingBox::isInRange(BoundingBox * other) {
+	glm::vec3 center = getCenter();
+	glm::vec3 otherCenter = other->getCenter();
+
+	float sqrDistance = glm::distance2(center, otherCenter);
+
+	if(sqrDistance > _minSqrDistance)
+		return false; //not in range
+	else
+		return true; //in range
+}
+
 bool BoundingBox::checkCollision(BoundingBox* other) {
 	if(TestLog::USE_DOUBLE_DISPATCHING) {
 		return collidesWith(other);
@@ -196,21 +222,26 @@ glm::vec3 BoundingBox::getHalfSize() {
 
 void BoundingBox::setHalfSize(glm::vec3 newHalfSize) {
 	_halfSize = newHalfSize;
+
+	_isDirty = true;
 }
 
 glm::vec3 BoundingBox::getCenter() {
-	//only update the center if we have an owner and it is not static
-	if(_owner != nullptr && !_owner->isStatic()) _center = _owner->getLocalPosition();
+	_cleanDirtyFlag();
 
 	return _center;
 }
 
 glm::vec3 BoundingBox::getMin() {
-	return getCenter() - getHalfSize();
+	_cleanDirtyFlag();
+
+	return _min;
 }
 
 glm::vec3 BoundingBox::getMax() {
-	return getCenter() + getHalfSize();
+	_cleanDirtyFlag();
+
+	return _max;
 }
 
 GameObject* BoundingBox::getOwner() {
@@ -219,4 +250,16 @@ GameObject* BoundingBox::getOwner() {
 
 unsigned int BoundingBox::getType() {
 	return _type;
+}
+
+void BoundingBox::_cleanDirtyFlag() {
+	//clean the dirty flag if needed and update cached center, min and max positions (only marked as dirty if object moved)
+	if(!_isDirty) return;
+
+	if(_owner != nullptr) _center = _owner->getLocalPosition(); //only update center for bounds with an owner (non-octree bounds)
+
+	_min = _center - _halfSize;
+	_max = _center + _halfSize;
+
+	_isDirty = false;
 }

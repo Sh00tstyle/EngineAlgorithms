@@ -14,6 +14,7 @@ class World;
 class Mesh
 {
 	public:
+		virtual ~Mesh();
         /**
          * Loads a mesh from an .obj file. The file has to have:
          * vertexes, uvs, normals and face indexes. See load source
@@ -33,7 +34,6 @@ class Mesh
 
 	protected:
 		Mesh();
-		virtual ~Mesh();
 
         //OpenGL id's for the different buffers created for this mesh
 		GLuint _indexBufferId;

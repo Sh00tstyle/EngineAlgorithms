@@ -1,7 +1,9 @@
 #include <iostream>
 #include "GameObject.hpp"
 #include "mge/behaviours/AbstractBehaviour.hpp"
-#include "mge\octree\BoundingBox.h"
+#include "mge/core/Mesh.hpp"
+#include "mge/materials/AbstractMaterial.hpp"
+#include "mge/octree/BoundingBox.h"
 #include "mge/core/LineRenderer.hpp"
 
 GameObject::GameObject(const std::string& pName, const glm::vec3& pPosition )
@@ -163,6 +165,8 @@ glm::mat4 GameObject::getWorldTransform() const
 
 void GameObject::translate(glm::vec3 pTranslation)
 {
+	if(_bounds && !_isStatic) _bounds->setDirtyFlag(true); //mark as dirty if it is not static, since the object moved
+
 	setTransform(glm::translate(_transform, pTranslation));
 }
 
@@ -178,7 +182,7 @@ void GameObject::rotate(float pAngle, glm::vec3 pAxis)
 
 void GameObject::update(float pStep)
 {
-    //make sure behaviour is updated after worldtransform is set
+	//make sure behaviour is updated after worldtransform is set
 	if (_behaviour) {
 		_behaviour->update(pStep);
 	}

@@ -12,7 +12,6 @@ MovingBehaviour::MovingBehaviour(glm::vec3 pDirection, float pSpeed, glm::vec3 p
 
 	_octreeBounds = pOctreeBounds;
 
-	_bounds = nullptr;
 	_colliderRenderer = nullptr;
 }
 
@@ -20,13 +19,15 @@ MovingBehaviour::~MovingBehaviour() {
 }
 
 void MovingBehaviour::update(float pStep) {
+	isColliding = false; //reset it here during update since the collision checks are executed after all gameobjects are updated
+
 	if(_owner->isStatic()) return;
+
+	//rotate 45°/s over the y axis
+	if(_rotate) _owner->rotate(pStep * glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//moves in the given diretion with the given speed
 	_owner->translate(_direction * _speed * pStep);
-
-	//rotate 45°/s over the x and y axes
-	if(_rotate) _owner->rotate(pStep * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 
 	_resolveOutOfBounds();
 }

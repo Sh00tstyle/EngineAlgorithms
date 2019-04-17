@@ -66,9 +66,6 @@ class Octree {
 		void _insert(GameObject* movedObject);
 		void _initNode(BoundingBox* bounds, GameObject* item);
 
-		//reset collision states to false and evaluate them at the start and at the end of the frame respectively
-		void _resetCollisionStates();
-
 		//cleanup
 		void _destructOctree();
 

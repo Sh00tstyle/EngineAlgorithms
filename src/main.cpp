@@ -4,6 +4,7 @@
 #include "mge/MGEDemo.hpp"
 
 #include "mge/util/TestLog.h"
+#include "mge/util/TestSet.h"
 #include "mge/config.hpp"
 
 /**

@@ -25,7 +25,6 @@ class MovingBehaviour : public AbstractBehaviour
 
 		glm::vec3 _octreeBounds;
 
-		BoundingBox* _bounds;
 		LineRenderer* _colliderRenderer;
 
 		void _resolveOutOfBounds();

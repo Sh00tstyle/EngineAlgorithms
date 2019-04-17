@@ -22,10 +22,11 @@ bool AABB::collidesWithSwitch(BoundingBox * other) {
 	switch(other->getType()) {
 		case 1:
 			return isColliding(this, (AABB*)other); //AABB vs AABB
-			break;
 
 		case 2:
 			return isColliding(this, (OBB*)other); //AABB vs OBB
-			break;
+
+		default:
+			return false;
 	}
 }

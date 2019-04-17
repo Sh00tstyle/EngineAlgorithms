@@ -85,7 +85,7 @@ void Octree::buildTree(BoundingBox* bounds, std::vector<GameObject*> objects) {
 	_octantRenderer = new LineRenderer(bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); //blue
 
-	if(_dynamicObjects.size() <= _NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
+	if(_dynamicObjects.size() <= (unsigned int)_NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) return; //terminate recursion, if we reached a leaf node
 
 	//new octant areas for the child nodes
 	BoundingBox* areas[8];
@@ -224,8 +224,6 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 	unsigned int staticsCount = _staticObjects.size();
 	unsigned int parentObjectsCount = parentObjects.size();
 
-	_resetCollisionStates();
-
 	//execute collision detection for at least 2 objects in the object list or for 1 object each in the object list and the root node list
 	if((dynamicsCount + staticsCount + parentObjectsCount) > 1) {
 		GameObject* currentObject = nullptr;
@@ -255,10 +253,12 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 				if(otherObject == nullptr) continue;
 
 				otherCollider = otherObject->getBoundingBox();
-				otherBehaviour = otherObject->getBehaviour();
 
 				if(otherCollider == nullptr) continue;
 
+				if(!currentCollider->isInRange(otherCollider)) continue; //the other object is too far away, so don't perform a collision check
+
+				otherBehaviour = otherObject->getBehaviour();
 				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
@@ -278,10 +278,12 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 				if(otherObject == nullptr) continue;
 
 				otherCollider = otherObject->getBoundingBox();
-				otherBehaviour = otherObject->getBehaviour();
 
 				if(otherCollider == nullptr) continue;
 
+				if(!currentCollider->isInRange(otherCollider)) continue; //the other object is too far away, so don't perform a collision check
+
+				otherBehaviour = otherObject->getBehaviour();
 				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
@@ -301,10 +303,12 @@ void Octree::checkCollisions(std::vector<GameObject*> parentObjects) {
 				if(otherObject == nullptr) continue;
 
 				otherCollider = otherObject->getBoundingBox();
-				otherBehaviour = otherObject->getBehaviour();
 
 				if(otherCollider == nullptr) continue;
 
+				if(!currentCollider->isInRange(otherCollider)) continue; //the other object is too far away, so don't perform a collision check
+
+				otherBehaviour = otherObject->getBehaviour();
 				++TestLog::COLLISION_CHECKS;
 
 				//collision detection calculation
@@ -374,7 +378,7 @@ void Octree::_initOctree(int depth) {
 
 void Octree::_insert(GameObject * movedObject) {
 	//NOTE: insert can only be called for dynamic objects
-	if((_dynamicObjects.size() + _staticObjects.size()) < _NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) {
+	if((_dynamicObjects.size() + _staticObjects.size()) < (unsigned int)_NODE_TRESHOLD || _depth >= _TOTAL_DEPTH) {
 		//if the subdivision threshold isnt reached yet or if the tree doesnt allow more depth, just add the object to the list
 		_dynamicObjects.push_back(movedObject);
 		return;
@@ -437,16 +441,6 @@ void Octree::_initNode(BoundingBox * bounds, GameObject * movedObject) {
 	_bounds = bounds;
 	_octantRenderer = new LineRenderer(bounds, true);
 	_octantRenderer->setLineColor(glm::vec4(0.0f, 0.0f, 1.0f, 0.5f)); //blue
-}
-
-void Octree::_resetCollisionStates() {
-	for(unsigned int i = 0; i < _dynamicObjects.size(); ++i) {
-		_dynamicObjects[i]->getBehaviour()->isColliding = false;
-	}
-
-	for(unsigned int i = 0; i < _staticObjects.size(); ++i) {
-		_staticObjects[i]->getBehaviour()->isColliding = false;
-	}
 }
 
 void Octree::evaluateCollisionStates() {

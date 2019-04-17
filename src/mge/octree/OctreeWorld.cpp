@@ -18,7 +18,7 @@ OctreeWorld::~OctreeWorld() {
 }
 
 void OctreeWorld::update(float step) {
-	GameObject::update(step); //call update from base class
+	GameObject::update(step); //call update from base class and update all gameobjects first
 
 	//updateOctree(); //version 1: clear and refill octree lists every frame
 	//buildOctree(); //version 2: trash and rebuild entire octree every frame

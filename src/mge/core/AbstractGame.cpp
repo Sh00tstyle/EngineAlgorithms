@@ -101,8 +101,8 @@ void AbstractGame::run()
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
 	while (_window->isOpen()) {
-		//execute test for max 30s
-		if(TestLog::time() >= 30.0f) {
+		//execute test for 1000 frames or if one minute passed in case 1000 frames are taking too long
+		if(TestLog::FRAMES >= 1000) {
 			TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, TestLog::CURRENT_TESTSET->FileName);
 
 			_window->close();
@@ -119,8 +119,10 @@ void AbstractGame::run()
                 timeSinceLastUpdate -= timePerFrame;
                 _update(timePerFrame.asSeconds());
 
-				//execute test for max 30s
-				if(TestLog::time() >= 30.0f) {
+				//execute test for max 60s
+				if(TestLog::time() >= 60.0f) {
+
+
 					TestLog::writeResultsToFile(config::OCTREE_LOG_PATH, TestLog::CURRENT_TESTSET->FileName);
 
 					_window->close();
@@ -138,7 +140,7 @@ void AbstractGame::run()
             timeSinceLastFPSCalculation += renderClock.restart().asSeconds();
             if (timeSinceLastFPSCalculation > 1) {
                 _fps = frameCount/timeSinceLastFPSCalculation;
-				TestLog::FPS = _fps;
+				TestLog::FPS = (unsigned int)_fps;
                 timeSinceLastFPSCalculation -= 1;
                 frameCount = 0;
             }

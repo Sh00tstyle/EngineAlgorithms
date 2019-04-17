@@ -47,22 +47,22 @@ void TestLog::start() {
 
 float TestLog::time() {
 	std::chrono::duration<double> diff = std::chrono::steady_clock::now() - _START;
-	return diff.count();
+	return (float)diff.count();
 }
 
 void TestLog::setupTest(unsigned int testIndex) {
-	std::cout << "Starting test " << testIndex << std::endl;
-
 	start();
 
 	CURRENT_TESTSET = TESTSETS[testIndex];
 
+	std::cout << "Starting test " << testIndex << " for file " << CURRENT_TESTSET->FileName << std::endl;
+
 	TOTAL_OBJECTS = CURRENT_TESTSET->TotalObjects;
 
-	STATIC_OBJECTS = TOTAL_OBJECTS * CURRENT_TESTSET->StaticObjects;
+	STATIC_OBJECTS = (unsigned int)(TOTAL_OBJECTS * CURRENT_TESTSET->StaticObjects);
 	DYNAMIC_OBJECTS = TOTAL_OBJECTS - STATIC_OBJECTS;
 
-	OBB_COLLIDER = TOTAL_OBJECTS * CURRENT_TESTSET->ObbCollider;
+	OBB_COLLIDER = (unsigned int)(TOTAL_OBJECTS * CURRENT_TESTSET->ObbCollider);
 	AABB_COLLIDER = TOTAL_OBJECTS - OBB_COLLIDER;
 
 	OCTREE_DEPTH = CURRENT_TESTSET->OctreeDepth;
@@ -107,8 +107,6 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 	if(fileWrite.is_open()) {
 		std::cout << "Writing log file '" + filename + "' to " + filepath << std::endl;
 
-		TestLog::FPS = TestLog::FRAMES / TestLog::time(); //average fps
-
 		if(generateHeader) {
 			fileWrite << "sep=,\n"; //tells excel to seperate by comma
 			fileWrite << "FPS,";
@@ -128,24 +126,28 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 			fileWrite << "Double dispatching";
 		}
 
+		float time = TestLog::time();
+
+		FPS = (unsigned int)(FRAMES / time); //average fps
+
 		fileWrite << "\n";
 
-		fileWrite << std::to_string(TestLog::FPS) << ",";
-		fileWrite << std::to_string(TestLog::FRAMES) << ",";
-		fileWrite << std::to_string(TestLog::TOTAL_OBJECTS) << ",";
-		fileWrite << std::to_string(TestLog::STATIC_OBJECTS) << ",";
-		fileWrite << std::to_string(TestLog::DYNAMIC_OBJECTS) << ",";
-		fileWrite << std::to_string(TestLog::OBB_COLLIDER) << ",";
-		fileWrite << std::to_string(TestLog::AABB_COLLIDER) << ",";
-		fileWrite << std::to_string(TestLog::OCTREE_DEPTH) << ",";
-		fileWrite << std::to_string(TestLog::OCTREE_NODE_TRESHOLD) << ",";
-		fileWrite << std::to_string(TestLog::OCTREE_UPDATES) << ",";
-		fileWrite << std::to_string(TestLog::COLLISION_CHECKS) << ",";
-		fileWrite << std::to_string(TestLog::COLLISIONS) << ",";
-		fileWrite << std::to_string(TestLog::FIT_TESTS) << ",";
-		fileWrite << std::to_string(TestLog::time()) << ",";
+		fileWrite << std::to_string(FPS) << ",";
+		fileWrite << std::to_string(FRAMES) << ",";
+		fileWrite << std::to_string(TOTAL_OBJECTS) << ",";
+		fileWrite << std::to_string(STATIC_OBJECTS) << ",";
+		fileWrite << std::to_string(DYNAMIC_OBJECTS) << ",";
+		fileWrite << std::to_string(OBB_COLLIDER) << ",";
+		fileWrite << std::to_string(AABB_COLLIDER) << ",";
+		fileWrite << std::to_string(OCTREE_DEPTH) << ",";
+		fileWrite << std::to_string(OCTREE_NODE_TRESHOLD) << ",";
+		fileWrite << std::to_string(OCTREE_UPDATES) << ",";
+		fileWrite << std::to_string(COLLISION_CHECKS) << ",";
+		fileWrite << std::to_string(COLLISIONS) << ",";
+		fileWrite << std::to_string(FIT_TESTS) << ",";
+		fileWrite << std::to_string(time) << ",";
 
-		if(TestLog::USE_DOUBLE_DISPATCHING) {
+		if(USE_DOUBLE_DISPATCHING) {
 			fileWrite << "true";
 		} else {
 			fileWrite << "false";
@@ -167,21 +169,21 @@ void TestLog::writeConfigFile(std::string filepath, std::string filename) {
 		std::cout << "Writing config file '" + filename + "' to " + filepath << std::endl;
 
 		//write config values to file
-		file << "Total Objects=" << std::to_string(TestLog::TOTAL_OBJECTS) << "\n\n";
+		file << "Total Objects=" << std::to_string(TOTAL_OBJECTS) << "\n\n";
 
 		file << "Default Testset" << "\n";
-		file << "Static Objects=" << std::to_string(TestLog::STATIC_OBJECTS) << "\n";
-		file << "OBB Collider=" << std::to_string(TestLog::OBB_COLLIDER) << "\n";
-		file << "Max Octree Depth=" << std::to_string(TestLog::OCTREE_DEPTH) << "\n";
-		file << "Octree Node Threshold=" << std::to_string(TestLog::OCTREE_NODE_TRESHOLD) << "\n";
-		file << "Use Double Dispatching=" << std::to_string(TestLog::USE_DOUBLE_DISPATCHING) << "\n\n";
+		file << "Static Objects=" << std::to_string(STATIC_OBJECTS) << "\n";
+		file << "OBB Collider=" << std::to_string(OBB_COLLIDER) << "\n";
+		file << "Max Octree Depth=" << std::to_string(OCTREE_DEPTH) << "\n";
+		file << "Octree Node Threshold=" << std::to_string(OCTREE_NODE_TRESHOLD) << "\n";
+		file << "Use Double Dispatching=" << std::to_string(USE_DOUBLE_DISPATCHING) << "\n\n";
 
 		file << "Testset Configs" << "\n";
-		file << "Static Objects=" << std::to_string(TestLog::STATIC_OBJECTS) << "\n";
-		file << "OBB Collider=" << std::to_string(TestLog::OBB_COLLIDER) << "\n";
-		file << "Max Octree Depth=" << std::to_string(TestLog::OCTREE_DEPTH) << "\n";
-		file << "Octree Node Threshold=" << std::to_string(TestLog::OCTREE_NODE_TRESHOLD) << "\n";
-		file << "Use Double Dispatching=" << std::to_string(TestLog::USE_DOUBLE_DISPATCHING);
+		file << "Static Objects=-1\n";
+		file << "OBB Collider=-1\n";
+		file << "Max Octree Depth=-1\n";
+		file << "Octree Node Threshold=-1\n";
+		file << "Use Double Dispatching=-1";
 
 		file.close();
 	} else {
@@ -342,7 +344,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 		values.clear();
 		valueStream.str(tokens[19]);
 
-		std::vector<unsigned int> octreeDepths;
+		std::vector<int> octreeDepths;
 
 		while(std::getline(valueStream, value, ',')) {
 			values.push_back(value);
@@ -352,7 +354,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		for(unsigned int i = 0; i < values.size(); ++i) {
 			iss.str(values[i]);
-			unsigned int octreeDepthValue;
+			int octreeDepthValue;
 			iss >> octreeDepthValue; //convert to value
 
 			octreeDepths.push_back(octreeDepthValue); //store in vector
@@ -364,7 +366,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 		values.clear();
 		valueStream.str(tokens[21]);
 
-		std::vector<unsigned int> nodeThesholds;
+		std::vector<int> nodeThesholds;
 
 		while(std::getline(valueStream, value, ',')) {
 			values.push_back(value);
@@ -374,7 +376,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		for(unsigned int i = 0; i < values.size(); ++i) {
 			iss.str(values[i]);
-			unsigned int nodeThresholdValue;
+			int nodeThresholdValue;
 			iss >> nodeThresholdValue; //convert to value
 
 			nodeThesholds.push_back(nodeThresholdValue); //store in vector
@@ -386,7 +388,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 		values.clear();
 		valueStream.str(tokens[23]);
 
-		std::vector<unsigned int> doubleDispatchingValues;
+		std::vector<int> doubleDispatchingValues;
 
 		while(std::getline(valueStream, value, ',')) {
 			values.push_back(value);
@@ -396,7 +398,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		for(unsigned int i = 0; i < values.size(); ++i) {
 			iss.str(values[i]);
-			unsigned int doubleDispatchingValue;
+			int doubleDispatchingValue;
 			iss >> doubleDispatchingValue; //convert to value
 
 			doubleDispatchingValues.push_back(doubleDispatchingValue); //store in vector
@@ -426,6 +428,8 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 			//octree depths
 			for(unsigned int j = 0; j < octreeDepths.size(); ++j) {
+				if(octreeDepths[j] < 0) break; //don't run tests for values lower than 0
+
 				currentTestSet = defaultSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
@@ -437,6 +441,8 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 			//node thresholds
 			for(unsigned int j = 0; j < nodeThesholds.size(); ++j) {
+				if(nodeThesholds[j] < 0) break; //don't run tests for values lower than 0
+
 				currentTestSet = defaultSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
@@ -448,6 +454,8 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 			//static objects
 			for(unsigned int j = 0; j < staticObjects.size(); ++j) {
+				if(staticObjects[j] < 0) break; //don't run tests for values lower than 0
+
 				currentTestSet = defaultSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
@@ -459,6 +467,8 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 			//obb collider
 			for(unsigned int j = 0; j < obbCollider.size(); ++j) {
+				if(obbCollider[j] < 0) break; //don't run tests for values lower than 0
+
 				currentTestSet = defaultSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
@@ -470,6 +480,8 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 			//double dispatching
 			for(unsigned int j = 0; j < doubleDispatchingValues.size(); ++j) {
+				if(doubleDispatchingValues[j] < 0) break; //don't run tests for values lower than 0
+
 				currentTestSet = defaultSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
