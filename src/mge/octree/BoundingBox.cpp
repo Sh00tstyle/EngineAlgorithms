@@ -237,7 +237,8 @@ glm::vec3 BoundingBox::getMin() {
 	if(TestLog::USE_DIRTY_FLAG) {
 		_cleanDirtyFlag();
 	} else {
-		_min = getCenter() - _halfSize;
+		if(_owner != nullptr && !_owner->isStatic())
+			_min = getCenter() - _halfSize;
 	}
 
 	return _min;
@@ -247,7 +248,8 @@ glm::vec3 BoundingBox::getMax() {
 	if(TestLog::USE_DIRTY_FLAG) {
 		_cleanDirtyFlag();
 	} else {
-		_max = getCenter() - _halfSize;
+		if(_owner != nullptr && !_owner->isStatic())
+			_max = getCenter() - _halfSize;
 	}
 
 	return _max;

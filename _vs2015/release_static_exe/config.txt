@@ -7,7 +7,7 @@ Max Octree Depth=4
 Octree Node Threshold=4
 Use Double Dispatching=1
 Octree Version=3
-Use Dirty Flag=0
+Use Dirty Flag=1
 Use Range Check=0
 
 Testset configs
