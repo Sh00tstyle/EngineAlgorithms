@@ -13,10 +13,9 @@
 int Octree::_TOTAL_DEPTH = 0; //init static depth member
 int Octree::_NODE_TRESHOLD = 10; //init static node treshold member
 
-Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode), _dynamicObjects() {
+Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bounds(pBounds), _parentNode(pParentNode), _dynamicObjects(), _staticObjects() {
 	if(_parentNode == nullptr) {
 		_TOTAL_DEPTH = pDepth;
-		TestLog::OCTREE_DEPTH = _TOTAL_DEPTH;
 		_depth = 0;
 	} else {
 		_depth = _TOTAL_DEPTH - pDepth; //depth of the node itself
@@ -28,7 +27,7 @@ Octree::Octree(BoundingBox * pBounds, int pDepth, Octree * pParentNode) : _bound
 	_initOctree(pDepth); //build octree for the first time, since it is the root node
 }
 
-Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(pParentNode), _octantRenderer(nullptr), _dynamicObjects() {
+Octree::Octree(int pDepth, Octree* pParentNode) : _bounds(nullptr), _parentNode(pParentNode), _octantRenderer(nullptr), _dynamicObjects(), _staticObjects() {
 	//init everything with null except for the depth, the buildTree function will take care of filling the tree node with relevant data
 	if(_parentNode == nullptr) {
 		_TOTAL_DEPTH = TestLog::OCTREE_DEPTH;
@@ -148,7 +147,7 @@ void Octree::updateNodes() {
 			if(_lifetime == -1) { //start lifetime countdown
 				_lifetime = _maxLifetime;
 			} else if(_lifetime > 0) { //update the countdown
-				_lifetime--;
+				--_lifetime;
 			}
 		}
 	} else {
@@ -211,6 +210,7 @@ void Octree::updateNodes() {
 
 void Octree::clearObjects() {
 	_dynamicObjects.clear();
+	_staticObjects.clear();
 
 	if(_depth >= _TOTAL_DEPTH) return;
 

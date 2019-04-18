@@ -177,6 +177,8 @@ void BoundingBox::setDirtyFlag(bool value) {
 }
 
 bool BoundingBox::isInRange(BoundingBox * other) {
+	if(!TestLog::USE_RANGE_CHECK) return true; //perform no range check
+
 	float sqrDistance = glm::distance2(getCenter(), other->getCenter());
 
 	if(sqrDistance > _minSqrDistance)
@@ -220,19 +222,33 @@ void BoundingBox::setHalfSize(glm::vec3 newHalfSize) {
 }
 
 glm::vec3 BoundingBox::getCenter() {
-	_cleanDirtyFlag();
+	if(TestLog::USE_DIRTY_FLAG) {
+		_cleanDirtyFlag();
+	} else {
+		if(_owner != nullptr && !_owner->isStatic()) 
+			_center = _owner->getLocalPosition();
+	}
+
 
 	return _center;
 }
 
 glm::vec3 BoundingBox::getMin() {
-	_cleanDirtyFlag();
+	if(TestLog::USE_DIRTY_FLAG) {
+		_cleanDirtyFlag();
+	} else {
+		_min = getCenter() - _halfSize;
+	}
 
 	return _min;
 }
 
 glm::vec3 BoundingBox::getMax() {
-	_cleanDirtyFlag();
+	if(TestLog::USE_DIRTY_FLAG) {
+		_cleanDirtyFlag();
+	} else {
+		_max = getCenter() - _halfSize;
+	}
 
 	return _max;
 }

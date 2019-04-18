@@ -26,22 +26,15 @@ int main()
 {
     std::cout << "Starting Tests" << std::endl;
 
+	//try to read a config file (always initializes at least one default test) and write a default one if none exists
 	if(!TestLog::readConfigFile(config::OCTREE_CFG_PATH, "config.txt")) {
-		
-		std::cout << "Cannot test without testsets" << std::endl;
-
 		TestLog::writeConfigFile(config::OCTREE_CFG_PATH, "config.txt");
-
-		int blocker;
-		std::cin >> blocker; //block the application to read the console info
-
-		return 0;
 	}
 
+	//execute application for each testset
 	for(unsigned int i = 0; i < TestLog::TESTSETS.size(); ++i) {
 		TestLog::setupTest(i);
 
-		//execute application for each testset
 		AbstractGame* game = new MGEDemo();
 		game->initialize();
 		game->run();

@@ -91,13 +91,32 @@ void MGEDemo::_updateHud() {
 	debugInfo += std::string("Collision Checks: ") + std::to_string(TestLog::COLLISION_CHECKS) + "\n";
 	debugInfo += std::string("Collisions: ") + std::to_string(TestLog::COLLISIONS) + "\n";
 	debugInfo += std::string("Fit Tests: ") + std::to_string(TestLog::FIT_TESTS) + "\n";
-	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n\n";
+	debugInfo += std::string("Time: ") + std::to_string(TestLog::time()) + "\n";
+
 	debugInfo += std::string("Double dispatching: ");
 
 	if(TestLog::USE_DOUBLE_DISPATCHING) {
-		debugInfo += std::string("true\n\n");
+		debugInfo += std::string("true\n");
 	} else {
-		debugInfo += std::string("false\n\n");
+		debugInfo += std::string("false\n");
+	}
+
+	debugInfo += std::string("Octree Version: ") + std::to_string(TestLog::OCTREE_VERSION) + "\n";
+
+	debugInfo += std::string("Dirty Flag: ");
+
+	if(TestLog::USE_DIRTY_FLAG) {
+		debugInfo += std::string("true\n");
+	} else {
+		debugInfo += std::string("false\n");
+	}
+
+	debugInfo += std::string("Range Check: ");
+
+	if(TestLog::USE_RANGE_CHECK) {
+		debugInfo += std::string("true\n");
+	} else {
+		debugInfo += std::string("false\n");
 	}
 
 	_hud->setDebugInfo(debugInfo);

@@ -27,6 +27,9 @@ class TestLog {
 		static unsigned int OCTREE_NODE_TRESHOLD; //the maximum amount of objects a node can store before subdividing
 		static unsigned int FIT_TESTS; //amount if tests wether an objects fits in an octant of the octree
 		static bool USE_DOUBLE_DISPATCHING; //using either double dispatching or a switch case for collision detection
+		static unsigned int OCTREE_VERSION; //specifies which iteration of the octree should be used
+		static bool USE_DIRTY_FLAG; //determines if dirty flag optimization for collider positions is used
+		static bool USE_RANGE_CHECK; //determines if the range check optimization before collision detection is used
 
 		static void start(); //initialize/reset the test class
 		static float time(); //returns the time that has elapsed since the start

@@ -1,11 +1,14 @@
-Total Objects=1000,2000
+Total Objects=1000, 1500
 
 Default Testset
-Static Objects=0.5
+Static Objects=0
 OBB Collider=0
 Max Octree Depth=4
 Octree Node Threshold=4
 Use Double Dispatching=1
+Octree Version=3
+Use Dirty Flag=1
+Use Range Check=0
 
 Testset configs
 Static Objects=-1
@@ -13,3 +16,6 @@ OBB Collider=-1
 Max Octree Depth=-1
 Octree Node Threshold=-1
 Use Double Dispatching=-1
+Octree Version=-1
+Use Dirty Flag=-1
+Use Range Check=-1

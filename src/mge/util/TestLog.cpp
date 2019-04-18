@@ -23,24 +23,31 @@ unsigned int TestLog::COLLISION_CHECKS = 0;
 unsigned int TestLog::COLLISIONS = 0;
 unsigned int TestLog::FIT_TESTS = 0;
 bool TestLog::USE_DOUBLE_DISPATCHING = false;
+unsigned int TestLog::OCTREE_VERSION = 0;
+bool TestLog::USE_DIRTY_FLAG = false;
+bool TestLog::USE_RANGE_CHECK = false;
 
 std::chrono::steady_clock::time_point TestLog::_START;
 
 void TestLog::start() {
+	//default setup
 	FPS = 0;
 	FRAMES = 0;
-	TOTAL_OBJECTS = 0;
-	STATIC_OBJECTS = 0;
-	DYNAMIC_OBJECTS = 0;
-	OBB_COLLIDER = 0;
-	AABB_COLLIDER = 0;
-	OCTREE_DEPTH = 0;
-	OCTREE_NODE_TRESHOLD = 0;
+	TOTAL_OBJECTS = 2000;
+	STATIC_OBJECTS = 1000;
+	DYNAMIC_OBJECTS = 1000;
+	OBB_COLLIDER = 1000;
+	AABB_COLLIDER = 1000;
+	OCTREE_DEPTH = 4;
+	OCTREE_NODE_TRESHOLD = 5;
 	OCTREE_UPDATES = 0;
 	COLLISION_CHECKS = 0;
 	COLLISIONS = 0;
 	FIT_TESTS = 0;
-	USE_DOUBLE_DISPATCHING = false;
+	USE_DOUBLE_DISPATCHING = true;
+	OCTREE_VERSION = 3;
+	USE_DIRTY_FLAG = true;
+	USE_RANGE_CHECK = true;
 
 	_START = std::chrono::steady_clock::now();
 }
@@ -69,6 +76,10 @@ void TestLog::setupTest(unsigned int testIndex) {
 	OCTREE_NODE_TRESHOLD = CURRENT_TESTSET->NodeTheshold;
 
 	USE_DOUBLE_DISPATCHING = CURRENT_TESTSET->DoubleDispatching;
+
+	OCTREE_VERSION = CURRENT_TESTSET->OctreeVersion;
+	USE_DIRTY_FLAG = CURRENT_TESTSET->DirtyFlag;
+	USE_RANGE_CHECK = CURRENT_TESTSET->RangeCheck;
 }
 
 void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
@@ -123,7 +134,10 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 			fileWrite << "Collisions,";
 			fileWrite << "Fit Tests,";
 			fileWrite << "Time,";
-			fileWrite << "Double dispatching";
+			fileWrite << "Double dispatching,";
+			fileWrite << "Octree Version,";
+			fileWrite << "Dirty Flag,";
+			fileWrite << "Range Check";
 		}
 
 		float time = TestLog::time();
@@ -148,6 +162,20 @@ void TestLog::writeResultsToFile(std::string filepath, std::string filename) {
 		fileWrite << std::to_string(time) << ",";
 
 		if(USE_DOUBLE_DISPATCHING) {
+			fileWrite << "true,";
+		} else {
+			fileWrite << "false,";
+		}
+
+		fileWrite << std::to_string(OCTREE_VERSION) << ",";
+
+		if(USE_DIRTY_FLAG) {
+			fileWrite << "true,";
+		} else {
+			fileWrite << "false,";
+		}
+
+		if(USE_RANGE_CHECK) {
 			fileWrite << "true";
 		} else {
 			fileWrite << "false";
@@ -176,14 +204,20 @@ void TestLog::writeConfigFile(std::string filepath, std::string filename) {
 		file << "OBB Collider=" << std::to_string(OBB_COLLIDER) << "\n";
 		file << "Max Octree Depth=" << std::to_string(OCTREE_DEPTH) << "\n";
 		file << "Octree Node Threshold=" << std::to_string(OCTREE_NODE_TRESHOLD) << "\n";
-		file << "Use Double Dispatching=" << std::to_string(USE_DOUBLE_DISPATCHING) << "\n\n";
+		file << "Use Double Dispatching=" << std::to_string(USE_DOUBLE_DISPATCHING) << "\n";
+		file << "Octree Version=" << std::to_string(OCTREE_VERSION) << "\n";
+		file << "Use Dirty Flag=" << std::to_string(USE_DIRTY_FLAG) << "\n";
+		file << "Use Range Check=" << std::to_string(USE_RANGE_CHECK) << "\n\n";
 
 		file << "Testset Configs" << "\n";
 		file << "Static Objects=-1\n";
 		file << "OBB Collider=-1\n";
 		file << "Max Octree Depth=-1\n";
 		file << "Octree Node Threshold=-1\n";
-		file << "Use Double Dispatching=-1";
+		file << "Use Double Dispatching=-1\n";
+		file << "Octree Version=-1\n";
+		file << "Use Dirty Flag=-1\n";
+		file << "Use Range Check=-1";
 
 		file.close();
 	} else {
@@ -225,7 +259,15 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			}
 		}
 
-		if(lines.size() > 16) {
+		/**
+		//DEBUG: for finding token indices when changing config parsing
+
+		for(unsigned int i = 0; i < tokens.size(); ++i) {
+			std::cout << "Token " << i << " :" << tokens[i] << std::endl;
+		}
+		/**/
+
+		if(lines.size() > 22) { //one buffer line just in case
 			std::cout << "Unable to read file format" << std::endl;
 
 			return false;
@@ -296,9 +338,33 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		iss.clear();
 
+		//default testset: octree version
+		iss.str(tokens[14]);
+
+		unsigned int defaultOctreeVersion;
+		iss >> defaultOctreeVersion;
+
+		iss.clear();
+
+		//default testset: dirty flag
+		iss.str(tokens[16]);
+
+		unsigned int defaultDirtyFlag;
+		iss >> defaultDirtyFlag;
+
+		iss.clear();
+
+		//default testset: range check
+		iss.str(tokens[18]);
+
+		unsigned int defaultRangeCheck;
+		iss >> defaultRangeCheck;
+
+		iss.clear();
+
 		//testset configs: static objects
 		values.clear();
-		valueStream.str(tokens[15]);
+		valueStream.str(tokens[21]);
 
 		std::vector<float> staticObjects;
 
@@ -320,7 +386,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		//testset configs: obb collider
 		values.clear();
-		valueStream.str(tokens[17]);
+		valueStream.str(tokens[23]);
 
 		std::vector<float> obbCollider;
 
@@ -342,7 +408,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		//testset configs: octree depth
 		values.clear();
-		valueStream.str(tokens[19]);
+		valueStream.str(tokens[25]);
 
 		std::vector<int> octreeDepths;
 
@@ -364,7 +430,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		//testset configs: node theshold
 		values.clear();
-		valueStream.str(tokens[21]);
+		valueStream.str(tokens[27]);
 
 		std::vector<int> nodeThesholds;
 
@@ -386,7 +452,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 		//testset configs: double dispatching
 		values.clear();
-		valueStream.str(tokens[23]);
+		valueStream.str(tokens[29]);
 
 		std::vector<int> doubleDispatchingValues;
 
@@ -406,20 +472,89 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			iss.clear();
 		}
 
+		//testset configs: octree version
+		values.clear();
+		valueStream.str(tokens[31]);
+
+		std::vector<int> octreeVersionValues;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			int octreeVersionValue;
+			iss >> octreeVersionValue; //convert to value
+
+			octreeVersionValues.push_back(octreeVersionValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: dirty flag
+		values.clear();
+		valueStream.str(tokens[33]);
+
+		std::vector<int> dirtyFlagValues;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			int dirtyFlagValue;
+			iss >> dirtyFlagValue; //convert to value
+
+			dirtyFlagValues.push_back(dirtyFlagValue); //store in vector
+
+			iss.clear();
+		}
+
+		//testset configs: range check
+		values.clear();
+		valueStream.str(tokens[35]);
+
+		std::vector<int> rangeCheckValues;
+
+		while(std::getline(valueStream, value, ',')) {
+			values.push_back(value);
+		}
+
+		valueStream.clear();
+
+		for(unsigned int i = 0; i < values.size(); ++i) {
+			iss.str(values[i]);
+			int rangeCheckValue;
+			iss >> rangeCheckValue; //convert to value
+
+			rangeCheckValues.push_back(rangeCheckValue); //store in vector
+
+			iss.clear();
+		}
+
 		//create testsets
-		TestSet* defaultSet = new TestSet(); //basic testset template
-		defaultSet->StaticObjects = defaultStaticObjects;
-		defaultSet->ObbCollider = defaultObbCollider;
-		defaultSet->OctreeDepth = defaultOctreeDepth;
-		defaultSet->NodeTheshold = defaultNodeThreshold;
-		defaultSet->DoubleDispatching = defaultDoubleDispatching;
+		TestSet* templateSet = new TestSet(); //basic testset template
+		templateSet->StaticObjects = defaultStaticObjects;
+		templateSet->ObbCollider = defaultObbCollider;
+		templateSet->OctreeDepth = defaultOctreeDepth;
+		templateSet->NodeTheshold = defaultNodeThreshold;
+		templateSet->DoubleDispatching = defaultDoubleDispatching;
+		templateSet->OctreeVersion = defaultOctreeVersion;
+		templateSet->DirtyFlag = defaultDirtyFlag;
+		templateSet->RangeCheck = defaultRangeCheck;
 
 		TESTSETS.clear();
 		TestSet* currentTestSet = nullptr;
 
 		for(unsigned int i = 0; i < totalObjects.size(); ++i) {
 			//default testsets
-			currentTestSet = defaultSet->copy();
+			currentTestSet = templateSet->copy();
 
 			currentTestSet->TotalObjects = totalObjects[i];
 			currentTestSet->FileName = "log_default.csv";
@@ -430,7 +565,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			for(unsigned int j = 0; j < octreeDepths.size(); ++j) {
 				if(octreeDepths[j] < 0) break; //don't run tests for values lower than 0
 
-				currentTestSet = defaultSet->copy();
+				currentTestSet = templateSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
 				currentTestSet->OctreeDepth = octreeDepths[j];
@@ -443,7 +578,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			for(unsigned int j = 0; j < nodeThesholds.size(); ++j) {
 				if(nodeThesholds[j] < 0) break; //don't run tests for values lower than 0
 
-				currentTestSet = defaultSet->copy();
+				currentTestSet = templateSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
 				currentTestSet->NodeTheshold = nodeThesholds[j];
@@ -456,7 +591,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			for(unsigned int j = 0; j < staticObjects.size(); ++j) {
 				if(staticObjects[j] < 0) break; //don't run tests for values lower than 0
 
-				currentTestSet = defaultSet->copy();
+				currentTestSet = templateSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
 				currentTestSet->StaticObjects = staticObjects[j];
@@ -469,7 +604,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			for(unsigned int j = 0; j < obbCollider.size(); ++j) {
 				if(obbCollider[j] < 0) break; //don't run tests for values lower than 0
 
-				currentTestSet = defaultSet->copy();
+				currentTestSet = templateSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
 				currentTestSet->ObbCollider = obbCollider[j];
@@ -482,7 +617,7 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 			for(unsigned int j = 0; j < doubleDispatchingValues.size(); ++j) {
 				if(doubleDispatchingValues[j] < 0) break; //don't run tests for values lower than 0
 
-				currentTestSet = defaultSet->copy();
+				currentTestSet = templateSet->copy();
 
 				currentTestSet->TotalObjects = totalObjects[i];
 				currentTestSet->DoubleDispatching = doubleDispatchingValues[j];
@@ -490,16 +625,87 @@ bool TestLog::readConfigFile(std::string filepath, std::string filename) {
 
 				TESTSETS.push_back(currentTestSet);
 			}
+
+			//octree versions
+			for(unsigned int j = 0; j < octreeVersionValues.size(); ++j) {
+				if(octreeVersionValues[j] < 0) break; //don't run tests for values lower than 0
+
+				currentTestSet = templateSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->OctreeVersion = octreeVersionValues[j];
+				currentTestSet->FileName = "log_octreeversions.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//dirty flag
+			for(unsigned int j = 0; j < dirtyFlagValues.size(); ++j) {
+				if(dirtyFlagValues[j] < 0) break; //don't run tests for values lower than 0
+
+				currentTestSet = templateSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->DirtyFlag = dirtyFlagValues[j];
+				currentTestSet->FileName = "log_dirtyflag.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
+
+			//range check
+			for(unsigned int j = 0; j < rangeCheckValues.size(); ++j) {
+				if(rangeCheckValues[j] < 0) break; //don't run tests for values lower than 0
+
+				currentTestSet = templateSet->copy();
+
+				currentTestSet->TotalObjects = totalObjects[i];
+				currentTestSet->RangeCheck = rangeCheckValues[j];
+				currentTestSet->FileName = "log_rangecheck.csv";
+
+				TESTSETS.push_back(currentTestSet);
+			}
 		}
 
-		std::cout << "Read and generated " << TESTSETS.size() << " testsets\n" << std::endl;
+		if(TESTSETS.size() > 0) {
+			//successfully read testset configurations
+			std::cout << "Read and generated " << TESTSETS.size() << " testsets\n" << std::endl;
 
-		delete defaultSet; //not needed anymore
+			delete templateSet; //not needed anymore
+		} else {
+			//in case data cannot be parsed
+			std::cout << "Running default testset" << std::endl;
+
+			templateSet->StaticObjects = (float)TestLog::STATIC_OBJECTS / (float)TestLog::TOTAL_OBJECTS;
+			templateSet->ObbCollider = (float)TestLog::OBB_COLLIDER / (float)TestLog::TOTAL_OBJECTS;
+			templateSet->OctreeDepth = TestLog::OCTREE_DEPTH;
+			templateSet->NodeTheshold = TestLog::OCTREE_NODE_TRESHOLD;
+			templateSet->DoubleDispatching = TestLog::USE_DOUBLE_DISPATCHING;
+			templateSet->OctreeVersion = TestLog::OCTREE_VERSION;
+			templateSet->DirtyFlag = TestLog::USE_DIRTY_FLAG;
+			templateSet->RangeCheck = TestLog::USE_RANGE_CHECK;
+
+			TESTSETS.push_back(templateSet);
+		}
 
 		return true;
 	}
 
 	std::cout << "Unable to open file '" + filename + "' at " + filepath << std::endl;
+
+	std::cout << "Running default testset" << std::endl;
+
+	TestSet* defaultSet = new TestSet();
+
+	defaultSet->StaticObjects = (float)TestLog::STATIC_OBJECTS / (float)TestLog::TOTAL_OBJECTS;
+	defaultSet->ObbCollider = (float)TestLog::OBB_COLLIDER / (float)TestLog::TOTAL_OBJECTS;
+	defaultSet->OctreeDepth = TestLog::OCTREE_DEPTH;
+	defaultSet->NodeTheshold = TestLog::OCTREE_NODE_TRESHOLD;
+	defaultSet->DoubleDispatching = TestLog::USE_DOUBLE_DISPATCHING;
+	defaultSet->OctreeVersion = TestLog::OCTREE_VERSION;
+	defaultSet->DirtyFlag = TestLog::USE_DIRTY_FLAG;
+	defaultSet->RangeCheck = TestLog::USE_RANGE_CHECK;
+
+	TESTSETS.push_back(defaultSet);
 
 	return false;
 }

@@ -12,7 +12,7 @@ class AbstractBehaviour;
 
 class Octree {
 	public:
-		Octree(BoundingBox* pBounds, int pDepth = 0, Octree* pParentNode = nullptr); //version 1 constructor
+		Octree(BoundingBox* pBounds, int pDepth, Octree* pParentNode = nullptr); //version 1 constructor
 		Octree(int pDepth = 0, Octree* pParentNode = nullptr); //version 2 constructor
 		~Octree();
 

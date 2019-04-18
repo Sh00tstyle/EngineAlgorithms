@@ -9,6 +9,9 @@ TestSet::TestSet() {
 	OctreeDepth = 0;
 	NodeTheshold = 0;
 	DoubleDispatching = 0;
+	OctreeVersion = 0;
+	DirtyFlag = false;
+	RangeCheck = false;
 }
 
 TestSet::~TestSet() {
@@ -23,6 +26,9 @@ TestSet* TestSet::copy() {
 	newTestSet->OctreeDepth = OctreeDepth;
 	newTestSet->NodeTheshold = NodeTheshold;
 	newTestSet->DoubleDispatching = DoubleDispatching;
+	newTestSet->OctreeVersion = OctreeVersion;
+	newTestSet->DirtyFlag = DirtyFlag;
+	newTestSet->RangeCheck = RangeCheck;
 
 	return newTestSet;
 }
