@@ -249,7 +249,7 @@ glm::vec3 BoundingBox::getMax() {
 		_cleanDirtyFlag();
 	} else {
 		if(_owner != nullptr && !_owner->isStatic())
-			_max = getCenter() - _halfSize;
+			_max = getCenter() + _halfSize;
 	}
 
 	return _max;
