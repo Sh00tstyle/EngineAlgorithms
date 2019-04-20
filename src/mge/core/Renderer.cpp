@@ -47,6 +47,8 @@ void Renderer::setClearColor(int red, int green, int blue, int alpha) {
 }
 
 void Renderer::render(OctreeWorld* pWorld) {
+	//return;
+
 	Camera* camera = pWorld->getMainCamera();
 	render(pWorld, pWorld, nullptr, camera, true);
 	pWorld->renderOctree(pWorld->getWorldTransform(), glm::inverse(camera->getWorldTransform()), camera->getProjection()); //render the octree
